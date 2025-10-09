@@ -5,17 +5,23 @@
   "license": "ISC",
   "author": "K Hewett",
   "type": "module",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@node-loader/import-maps": "^2.0.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0"
   },
   "devDependencies": {
     "better-sqlite3": "^12.4.1"
+  },
+  "imports": {
+    "#config/*": "./src/config/*.js",
+    "#models/*": "./src/models/*.js",
+    "#routes/*": "./src/routes/*.js"
   },
   "nodemonConfig": {
     "legacyWatch": true,

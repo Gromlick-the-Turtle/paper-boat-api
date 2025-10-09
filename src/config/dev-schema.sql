@@ -108,4 +108,4 @@ CREATE TABLE IF NOT EXISTS custom_form_item (
     REFERENCES custom_form_item_type (id)
 );
 
-CREATE TABLE IF NOT EXISTS submissions ()
+-- CREATE TABLE IF NOT EXISTS submissions ()
