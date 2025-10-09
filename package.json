@@ -20,6 +20,7 @@
   "nodemonConfig": {
     "legacyWatch": true,
     "verbose": true,
+    "ext": "js,json,sql",
     "watch": [
       "src/*"
     ]
