@@ -13,10 +13,9 @@
   "dependencies": {
     "@node-loader/import-maps": "^2.0.0",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0"
-  },
-  "devDependencies": {
-    "better-sqlite3": "^12.4.1"
+    "express": "^5.1.0",
+    "lodash": "^4.17.21",
+    "pg-promise": "^12.2.0"
   },
   "imports": {
     "#config/*": "./src/config/*.js",

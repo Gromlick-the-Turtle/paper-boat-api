@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
 
-import db from '#config/db.dev.config';
 import routes from '#routes/routes';
 
 dotenv.config({ path: '.env' });

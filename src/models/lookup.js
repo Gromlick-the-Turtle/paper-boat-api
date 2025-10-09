@@ -1,5 +1,5 @@
-import db from '#config/db.dev.config';
+import db from '#config/db';
 
-const getRoles = async () => await db.prepare('SELECT * FROM role').all();
+const getRoles = async () => await db.any('SELECT * FROM role');
 
 export { getRoles };
