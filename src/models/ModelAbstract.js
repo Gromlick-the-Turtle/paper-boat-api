@@ -18,8 +18,13 @@ export default class ModelAbstract {
     }
 
     constructor (model) {
+        model = _.mapKeys(model, (val,key) => _.camelCase(key));
         _.each(this.constructor, (type, name) => {
             this[name] = model[name];
         });
+    }
+
+    forDB () {
+        return _.mapKeys(this, (val,key) => _.snakeCase(key));
     }
 }

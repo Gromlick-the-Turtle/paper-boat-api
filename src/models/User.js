@@ -5,8 +5,8 @@ import ModelAbstract from '#models/ModelAbstract';
 
 export default class User extends ModelAbstract {
     static id = Number;
-    static name_first = String;
-    static name_last = String;
+    static nameFirst = String;
+    static nameLast = String;
     static email = String;
     static butt = String;
 
