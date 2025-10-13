@@ -9,22 +9,20 @@ const db = pgp()({
     password: 'password'
 });
 
-db.insertObj = async (table, obj) => {
-    const cols = _.chain(obj)
-        .keys()
-        .map(k => `\t\t${k}`)
-        .join(',\n')
-        .value();
+const paramsFromObj = (obj) => {
+    const cols = _.keys(obj);
+    
+    const params = _.map(cols, c => `$(${c})`);
 
-    const params = _.chain(obj)
-        .keys()
-        .map(k => `\t\t$(${k})`)
-        .join(',\n')
-        .value();
+    return { cols, params };
+}
+
+db.insertObj = async (table, obj) => {
+    const { cols, params } = paramsFromObj(obj);
 
     const query = `
-        INSERT INTO public.${table} (\n${cols}\n\t)
-        VALUES (\n${params}\n\t)
+        INSERT INTO public.${table} (${_.join(cols, ', ')})
+        VALUES (${_.join(params, ', ')})
         RETURNING *
     `;
 
