@@ -4,8 +4,8 @@ export default class ModelAbstract {
     static init() {
         _.each(this, (type, name) => {
             this.__defineSetter__(name, function (val) {
-                if (_.isNil(val)) {
-                    this[`#${name}`] = val;
+                if (_.isNull(val)) {
+                    this[`#${name}`] = null;
                 } else {
                     this[`#${name}`] = new type(val);
                 }
@@ -20,11 +20,17 @@ export default class ModelAbstract {
     constructor (model) {
         model = _.mapKeys(model, (val,key) => _.camelCase(key));
         _.each(this.constructor, (type, name) => {
-            this[name] = model[name];
+            if (!_.isUndefined(model[name])) {
+                this[name] = model[name];
+            }
         });
     }
 
     forDB () {
-        return _.mapKeys(this, (val,key) => _.snakeCase(key));
+        return _.chain(this.constructor)
+            .mapValues((val, key) => this[key])
+            .mapKeys((val, key) => _.snakeCase(key))
+            .pickBy(val => !_.isUndefined(val))
+            .value();
     }
 }
