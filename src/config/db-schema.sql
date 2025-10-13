@@ -1,4 +1,5 @@
 -- Table: public.lookup
+-----------------------
 
 DROP TABLE IF EXISTS public.lookup;
 
@@ -14,7 +15,8 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.lookup
     OWNER to postgres;
 
--- Table: public.role
+-- Table: public.l_user_role
+----------------------------
 
 DROP TABLE IF EXISTS public.l_user_role;
 
@@ -30,7 +32,15 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.l_user_role
     OWNER to postgres;
 
+---------------------
+INSERT INTO l_user_role (id, label) VALUES
+(1, 'Admin'),
+(2, 'Reviewer'),
+(3, 'Author')
+;
+
 -- Table: public.trackable
+--------------------------
 
 DROP TABLE IF EXISTS public.trackable;
 
@@ -49,6 +59,7 @@ ALTER TABLE IF EXISTS public.trackable
     OWNER to postgres;
 
 -- Table: public.t_user
+-----------------------
 
 DROP TABLE IF EXISTS public.t_user;
 
