@@ -13,7 +13,7 @@ export default class User extends ModelAbstract {
     static emailVerified = Boolean;
 
     static async get (opts = {}) {
-        const users = await db.any("SELECT * FROM public.user");
+        const users = await db.selectArr('user');
         return _.map(users, user => new User(user));
     }
 

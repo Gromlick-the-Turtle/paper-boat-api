@@ -34,6 +34,16 @@ const paramsFromArr = (arr) => {
     return { cols, params, objs };
 }
 
+db.selectArr = async (table, args = {}) => {
+    const query = `
+        SELECT *
+        FROM public.${table}
+        WHERE deleted_at IS NULL
+    `
+
+    return await db.any(query);
+}
+
 db.insertObj = async (table, obj) => {
     const { cols, params } = paramsFromObj(obj);
 
