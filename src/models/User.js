@@ -6,6 +6,8 @@ import ModelAbstract from '#models/ModelAbstract';
 export default class User extends ModelAbstract {
     static { this.init(); }
 
+    static #table = 't_user';
+
     static id = Number;
     static nameFirst = String;
     static nameLast = String;
@@ -13,14 +15,14 @@ export default class User extends ModelAbstract {
     static emailVerified = Boolean;
 
     static async get (opts = {}) {
-        const users = await db.selectArr('user');
+        const users = await db.selectArr(this.#table);
         return _.map(users, user => new User(user));
     }
 
     static async create (user) {
         user = new User(user);
 
-        let {id} = await db.insertObj('user', user.forDB());
+        let {id} = await db.insertObj(this.#table, user.forDB());
         return id;
     }
 }
