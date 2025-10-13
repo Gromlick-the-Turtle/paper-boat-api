@@ -29,6 +29,31 @@ db.insertObj = async (table, obj) => {
     return await db.one(query, obj);
 }
 
+db.insertArr = async (table, arr) => {
+    const { cols, params } = paramsFromObj(arr[0]);
+
+    const objs = _.mapKeys(arr, (val,key) => `obj${key}`);
+
+    const values = _.chain(objs)
+        .map((obj,key) => {
+            return '(' + 
+                _.chain(cols)
+                .map(col => `$(${key}.${col})`)
+                .join(', ')
+                .value() +
+            ')';
+        })
+        .join(',\n\t')
+        .value();
+
+    const query = `
+        INSERT INTO public.${table} (${_.join(cols, ', ')}) VALUES \n\t${values}
+        RETURNING *
+    `;
+
+    return await db.any(query, objs);
+}
+
 db.updateObj = async (table, obj) => {
     const set = _.chain(obj)
         .map((val,key) => `${key} = $(${key})`)
