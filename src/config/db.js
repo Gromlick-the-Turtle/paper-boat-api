@@ -1,13 +1,6 @@
-import pgp from 'pg-promise';
 import _ from 'lodash';
 
-const db = pgp()({
-    host: 'localhost',
-    port: 8080,
-    user: 'postgres',
-    database: 'postgres',
-    password: 'password'
-});
+import db from '#config/pg-config';
 
 const paramsFromObj = (obj) => {
     const cols = _.keys(obj);
@@ -39,7 +32,7 @@ db.selectArr = async (table, args = {}) => {
         SELECT *
         FROM public.${table}
         WHERE deleted_at IS NULL
-    `
+    `;
 
     return await db.any(query);
 }
