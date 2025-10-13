@@ -13,6 +13,9 @@ export default class User extends ModelAbstract {
     static nameLast = String;
     static email = String;
     static emailVerified = Boolean;
+    static isAdmin = Boolean;
+    static isReviewer = Boolean;
+    static isAuthor = Boolean;
 
     static async get (opts = {}) {
         const users = await db.selectArr(this.#table);
