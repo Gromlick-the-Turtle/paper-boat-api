@@ -17,6 +17,23 @@ const paramsFromObj = (obj) => {
     return { cols, params };
 }
 
+const paramsFromArr = (arr) => {
+    const cols = _.keys(arr[0]);
+
+    const objs = _.mapKeys(arr, (val,key) => `obj${key}`);
+
+    const params = _.map(objs, (obj,key) => {
+        return '(' + 
+            _.chain(cols)
+            .map(col => `$(${key}.${col})`)
+            .join(', ')
+            .value() +
+        ')';
+    });
+
+    return { cols, params, objs };
+}
+
 db.insertObj = async (table, obj) => {
     const { cols, params } = paramsFromObj(obj);
 
@@ -30,24 +47,10 @@ db.insertObj = async (table, obj) => {
 }
 
 db.insertArr = async (table, arr) => {
-    const { cols, params } = paramsFromObj(arr[0]);
-
-    const objs = _.mapKeys(arr, (val,key) => `obj${key}`);
-
-    const values = _.chain(objs)
-        .map((obj,key) => {
-            return '(' + 
-                _.chain(cols)
-                .map(col => `$(${key}.${col})`)
-                .join(', ')
-                .value() +
-            ')';
-        })
-        .join(',\n\t')
-        .value();
+    const { cols, params, objs } = paramsFromArr(arr);
 
     const query = `
-        INSERT INTO public.${table} (${_.join(cols, ', ')}) VALUES \n\t${values}
+        INSERT INTO public.${table} (${_.join(cols, ', ')}) VALUES \n\t${_.join(params, ',\n\t')}
         RETURNING *
     `;
 
