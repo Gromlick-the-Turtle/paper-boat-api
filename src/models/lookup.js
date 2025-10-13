@@ -1,5 +1,13 @@
 import db from '#config/db';
+import ModelAbstract from '#models/ModelAbstract';
 
-const getRoles = async () => await db.any('SELECT * FROM role');
+export default class Lookup extends ModelAbstract {
+    static { this.init(); }
 
-export { getRoles };
+    static id = Number;
+    static label = String;
+
+    static async getRoles () {
+        return await db.any('SELECT * FROM l_user_role');
+    }
+}
