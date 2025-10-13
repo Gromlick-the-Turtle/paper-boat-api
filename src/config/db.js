@@ -29,4 +29,18 @@ db.insertObj = async (table, obj) => {
     return await db.one(query, obj);
 }
 
+db.updateObj = async (table, obj) => {
+    const set = _.chain(obj)
+        .map((val,key) => `${key} = $(${key})`)
+        .join(',\n\t')
+        .value();
+
+    const query = `
+        UPDATE public.${table} SET \n\t${set}
+        RETURNING *
+    `;
+
+    return await db.one(query, obj);
+}
+
 export default db;
