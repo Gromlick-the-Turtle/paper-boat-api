@@ -6,7 +6,7 @@ import Model from '#models/Model';
 export default class User extends Model {
     static { this.init(); }
 
-    static #table = 't_user';
+    static table = 't_user';
 
     static id = Number;
     static nameFirst = String;
@@ -16,16 +16,4 @@ export default class User extends Model {
     static isAdmin = Boolean;
     static isReviewer = Boolean;
     static isAuthor = Boolean;
-
-    static async get (opts = {}) {
-        const users = await db.selectArr(this.#table);
-        return _.map(users, user => new User(user));
-    }
-
-    static async create (user) {
-        user = new User(user);
-
-        let {id} = await db.insertObj(this.#table, user.forDB());
-        return id;
-    }
 }

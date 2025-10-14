@@ -1,3 +1,4 @@
+import db from '#config/db';
 import _ from 'lodash';
 
 export default class Model {
@@ -15,6 +16,34 @@ export default class Model {
                 return this[`#${name}`];
             });
         });
+    }
+
+    static async get (opts = {}) {
+        if (!this.table) {
+            throw Error(`Table not defined for ${this}`);
+        }
+
+        if (Object.hasOwn(this, 'noGet')) {
+            throw Error(`${this} has no get function`);
+        }
+
+        const items = await db.selectArr(this.table);
+        return _.map(items, item => new this(item));
+    }
+
+    static async create (item) {
+        if (!this.table) {
+            throw Error(`Table not defined for ${this}`);
+        }
+
+        if (Object.hasOwn(this, 'noCreate')) {
+            throw Error(`${this} has no create function`);
+        }
+
+        item = new this(item);
+
+        let {id} = await db.insertObj(this.table, item.forDB());
+        return id;
     }
 
     constructor (model) {
