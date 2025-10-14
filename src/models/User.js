@@ -1,9 +1,9 @@
 import _ from 'lodash';
 
 import db from '#config/db';
-import ModelAbstract from '#models/ModelAbstract';
+import Model from '#models/Model';
 
-export default class User extends ModelAbstract {
+export default class User extends Model {
     static { this.init(); }
 
     static #table = 't_user';

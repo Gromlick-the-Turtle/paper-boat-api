@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default class ModelAbstract {
+export default class Model {
     static init() {
         _.each(this, (type, name) => {
             this.__defineSetter__(name, function (val) {

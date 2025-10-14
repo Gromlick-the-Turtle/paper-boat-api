@@ -1,7 +1,7 @@
 import db from '#config/db';
-import ModelAbstract from '#models/ModelAbstract';
+import Model from '#models/Model';
 
-export default class Lookup extends ModelAbstract {
+export default class Lookup extends Model {
     static { this.init(); }
 
     static id = Number;
