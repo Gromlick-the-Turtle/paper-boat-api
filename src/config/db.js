@@ -102,4 +102,14 @@ db.updateObj = async (table, obj) => {
     return await db.one(query, obj);
 }
 
+db.deleteObj = async (table, obj) => {
+    const query = `
+        UPDATE ${db.tableSchema}.${table}
+        SET deleted_at = NOW()
+        WHERE id = $(id)
+    `;
+
+    return await db.none(query, obj);
+}
+
 export default db;

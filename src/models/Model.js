@@ -58,6 +58,18 @@ export default class Model {
         return await db.updateObj(this.table, item.forDB());
     }
 
+    static async delete (item) {
+        await this.initialized;
+
+        if (Object.hasOwn(this, 'noDelete')) {
+            throw Error(`${this} has no delete function`);
+        }
+
+        item = new this(item);
+
+        return await db.deleteObj(this.table, item.forDB());
+    }
+
     constructor (item) {
         if (_.isNil(this.constructor.initialized)) {
             throw Error (`${this.constructor} has not been initialized, await static init() function`);
