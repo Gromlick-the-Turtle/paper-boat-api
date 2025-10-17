@@ -48,7 +48,7 @@ export default class Model {
 
     constructor (obj) {
         if (_.isNil(this.constructor.initialized)) {
-            throw Error (`${this.constructor} has not been initialized, use factory() function`);
+            throw Error (`${this.constructor} has not been initialized, await static init() function`);
         }
 
         obj = _.mapKeys(obj, (val,key) => _.camelCase(key));
