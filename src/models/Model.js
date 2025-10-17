@@ -2,6 +2,9 @@ import db from '#config/db';
 import _ from 'lodash';
 
 export default class Model {
+    static hidden = [];
+    static fields = {};
+
     static async _init() {
         if (_.isNil(this.table)) {
             throw Error (`Table not defined for ${this}`);
@@ -33,7 +36,10 @@ export default class Model {
 
         const items = await db.selectArr(this.table, params.forDB());
 
-        return _.map(items, item => new this(item));
+        return _.map(items, item => {
+            item = _.omit(item, this.hidden);
+            return new this(item)
+        });
     }
 
     static async create (item) {

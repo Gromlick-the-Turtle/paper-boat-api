@@ -6,5 +6,9 @@ import Model from '#models/Model';
 export default class User extends Model {
     static table = 't_user';
 
+    static hidden = [
+        'password'
+    ];
+
     static { this.init(); }
 }
