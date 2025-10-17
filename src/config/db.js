@@ -27,10 +27,35 @@ const paramsFromArr = (arr) => {
     return { cols, params, objs };
 }
 
+db.tableSchema = 'public';
+
+db.getTableColumns = (table) => {
+    return db.any(`
+        SELECT
+            column_name AS name,
+            
+            CASE
+                WHEN data_type IN ('integer','numeric')
+                THEN 'Number'
+
+                WHEN data_type = 'boolean'
+                THEN 'Boolean'
+
+                WHEN data_type IN ('JSONB', 'JSON')
+                THEN 'Object'
+
+                ELSE 'String'
+            END AS type
+        FROM information_schema.columns
+        WHERE table_schema = '${db.tableSchema}'
+        AND table_name = $(table)
+    `, {table});
+}
+
 db.selectArr = async (table, args = {}) => {
     const query = `
         SELECT *
-        FROM public.${table}
+        FROM ${db.tableSchema}.${table}
         WHERE deleted_at IS NULL
     `;
 
@@ -41,7 +66,7 @@ db.insertObj = async (table, obj) => {
     const { cols, params } = paramsFromObj(obj);
 
     const query = `
-        INSERT INTO public.${table} (${_.join(cols, ', ')})
+        INSERT INTO ${db.tableSchema}.${table} (${_.join(cols, ', ')})
         VALUES (${_.join(params, ', ')})
         RETURNING *
     `;
@@ -53,7 +78,7 @@ db.insertArr = async (table, arr) => {
     const { cols, params, objs } = paramsFromArr(arr);
 
     const query = `
-        INSERT INTO public.${table} (${_.join(cols, ', ')}) VALUES \n\t${_.join(params, ',\n\t')}
+        INSERT INTO ${db.tableSchema}.${table} (${_.join(cols, ', ')}) VALUES \n\t${_.join(params, ',\n\t')}
         RETURNING *
     `;
 
@@ -67,7 +92,8 @@ db.updateObj = async (table, obj) => {
         .value();
 
     const query = `
-        UPDATE public.${table} SET \n\t${set}
+        UPDATE ${db.tableSchema}.${table} SET \n\t${set}
+        WHERE deleted_at IS NULL
         RETURNING *
     `;
 
