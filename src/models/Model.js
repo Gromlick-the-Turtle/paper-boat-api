@@ -46,16 +46,32 @@ export default class Model {
         return id;
     }
 
-    constructor (obj) {
+    static async update (item) {
+        await this.initialized;
+
+        if (Object.hasOwn(this, 'noUpdate')) {
+            throw Error(`${this} has no update function`);
+        }
+
+        item = new this(item);
+
+        return await db.updateObj(this.table, item.forDB());
+    }
+
+    constructor (item) {
         if (_.isNil(this.constructor.initialized)) {
             throw Error (`${this.constructor} has not been initialized, await static init() function`);
         }
 
-        obj = _.mapKeys(obj, (val,key) => _.camelCase(key));
+        if (!_.isObject(item)) {
+            throw Error (`${this.constructor} constructor error: item is not object`);
+        }
+
+        item = _.mapKeys(item, (val,key) => _.camelCase(key));
 
         const model = _.mapValues(this.constructor.fields, (type, name) => {
-            if (!_.isUndefined(obj[name])) {
-                return obj[name];
+            if (!_.isUndefined(item[name])) {
+                return item[name];
             }
         })
 

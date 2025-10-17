@@ -87,13 +87,15 @@ db.insertArr = async (table, arr) => {
 
 db.updateObj = async (table, obj) => {
     const set = _.chain(obj)
+        .omit(['id'])
         .map((val,key) => `${key} = $(${key})`)
         .join(',\n\t')
         .value();
 
     const query = `
         UPDATE ${db.tableSchema}.${table} SET \n\t${set}
-        WHERE deleted_at IS NULL
+        WHERE id = $(id)
+        AND deleted_at IS NULL
         RETURNING *
     `;
 
