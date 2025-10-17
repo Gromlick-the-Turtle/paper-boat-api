@@ -22,10 +22,18 @@ export default class Model {
         this.initialized = this._init();
     }
 
-    static async factory (model) {
-        if (_.isNil(this.constructor.initialized)) {
-            this.constructor.init();
-        }
+    static factory (obj) {
+        if (_.isNil(this.initialized)) { this.init(); }
+
+        obj = _.mapKeys(obj, (val,key) => _.camelCase(key));
+
+        const model = _.mapValues(this.fields, (type, name) => {
+            if (!_.isUndefined(obj[name])) {
+                return obj[name];
+            }
+        })
+
+        return model;
     }
 
     static async get (opts = {}) {
@@ -52,17 +60,12 @@ export default class Model {
         return id;
     }
 
-    constructor (model) {
+    constructor (obj) {
         if (_.isNil(this.constructor.initialized)) {
             throw Error (`${this.constructor} has not been initialized, use factory() function`);
         }
 
-        model = _.mapKeys(model, (val,key) => _.camelCase(key));
-        _.each(this.constructor.fields, (type, name) => {
-            if (!_.isUndefined(model[name])) {
-                this[name] = model[name];
-            }
-        });
+        Object.assign(this, this.constructor.factory(obj));
     }
 
     forDB () {
