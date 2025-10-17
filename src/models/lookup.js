@@ -1,12 +1,6 @@
 import db from '#config/db';
-import Model from '#models/Model';
 
-export default class Lookup extends Model {
-    static { this.init(); }
-
-    static id = Number;
-    static label = String;
-
+export default class Lookup {
     static async getCountries () {
         return await db.any('SELECT * FROM l_country');
     }

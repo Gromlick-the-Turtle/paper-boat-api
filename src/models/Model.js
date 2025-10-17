@@ -2,26 +2,34 @@ import db from '#config/db';
 import _ from 'lodash';
 
 export default class Model {
-    static init() {
-        _.each(this, (type, name) => {
-            this.__defineSetter__(name, function (val) {
-                if (_.isNull(val)) {
-                    this[`#${name}`] = null;
-                } else {
-                    this[`#${name}`] = new type(val);
-                }
-            });
+    static async _init() {
+        if (_.isNil(this.table)) {
+            throw Error (`Table not defined for ${this}`);
+        }
 
-            this.__defineGetter__(name, function () {
-                return this[`#${name}`];
-            });
-        });
+        const fields = await db.getTableColumns(this.table);
+
+        this.fields = _.chain(fields)
+            .mapKeys(({ name, type }) => _.camelCase(name))
+            .omit([ 'createdAt', 'updatedAt', 'deletedAt' ])
+            .mapValues(({ name, type }) => type)
+            .value();
+
+        return true;
+    }
+
+    static init() {
+        this.initialized = this._init();
+    }
+
+    static async factory (model) {
+        if (_.isNil(this.constructor.initialized)) {
+            this.constructor.init();
+        }
     }
 
     static async get (opts = {}) {
-        if (!this.table) {
-            throw Error(`Table not defined for ${this}`);
-        }
+        await this.initialized;
 
         if (Object.hasOwn(this, 'noGet')) {
             throw Error(`${this} has no get function`);
@@ -32,9 +40,7 @@ export default class Model {
     }
 
     static async create (item) {
-        if (!this.table) {
-            throw Error(`Table not defined for ${this}`);
-        }
+        await this.initialized;
 
         if (Object.hasOwn(this, 'noCreate')) {
             throw Error(`${this} has no create function`);
@@ -47,8 +53,12 @@ export default class Model {
     }
 
     constructor (model) {
+        if (_.isNil(this.constructor.initialized)) {
+            throw Error (`${this.constructor} has not been initialized, use factory() function`);
+        }
+
         model = _.mapKeys(model, (val,key) => _.camelCase(key));
-        _.each(this.constructor, (type, name) => {
+        _.each(this.constructor.fields, (type, name) => {
             if (!_.isUndefined(model[name])) {
                 this[name] = model[name];
             }
@@ -56,7 +66,7 @@ export default class Model {
     }
 
     forDB () {
-        return _.chain(this.constructor)
+        return _.chain(this.constructor.fields)
             .mapValues((val, key) => this[key])
             .mapKeys((val, key) => _.snakeCase(key))
             .pickBy(val => !_.isUndefined(val))
