@@ -42,8 +42,7 @@ export default class Model {
 
         item = new this(item);
 
-        let {id} = await db.insertObj(this.table, item.forDB());
-        return id;
+        return new this(await db.insertObj(this.table, item.forDB()));
     }
 
     static async update (item) {
@@ -55,7 +54,7 @@ export default class Model {
 
         item = new this(item);
 
-        return await db.updateObj(this.table, item.forDB());
+        return new this(await db.updateObj(this.table, item.forDB()));
     }
 
     static async delete (item) {

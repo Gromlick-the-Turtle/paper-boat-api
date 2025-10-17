@@ -1,20 +1,10 @@
 import express from 'express';
 import _ from 'lodash';
 
-import Lookup from '#models/Lookup';
-import User from '#models/User';
+import userRoutes from '#routes/userRoutes';
 
 const routes = express.Router()
 
-routes.get('/', (req, res) => res.json(['hi!']));
-
-routes.get('/roles', async (req, res) => res.json(await Lookup.getRoles()));
-
-routes.get('/user', async (req, res) => res.json(await User.get()));
-
-routes.post('/user', async (req, res) => {
-    const id = await User.create(req.body);
-    res.json(id);
-});
+routes.use('/user', userRoutes);
 
 export default routes;
