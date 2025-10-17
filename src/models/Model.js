@@ -42,7 +42,9 @@ export default class Model {
 
         item = new this(item);
 
-        return new this(await db.insertObj(this.table, item.forDB()));
+        const {id} = await db.insertObj(this.table, item.forDB());
+
+        return id;
     }
 
     static async update (item) {
@@ -54,7 +56,9 @@ export default class Model {
 
         item = new this(item);
 
-        return new this(await db.updateObj(this.table, item.forDB()));
+        await db.updateObj(this.table, item.forDB());
+
+        return true;
     }
 
     static async delete (item) {
@@ -66,7 +70,9 @@ export default class Model {
 
         item = new this(item);
 
-        return await db.deleteObj(this.table, item.forDB());
+        await db.deleteObj(this.table, item.forDB());
+
+        return true;
     }
 
     constructor (item) {

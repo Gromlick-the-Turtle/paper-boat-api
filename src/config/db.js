@@ -96,10 +96,9 @@ db.updateObj = async (table, obj) => {
         UPDATE ${db.tableSchema}.${table} SET \n\t${set}
         WHERE id = $(id)
         AND deleted_at IS NULL
-        RETURNING *
     `;
 
-    return await db.one(query, obj);
+    return await db.none(query, obj);
 }
 
 db.deleteObj = async (table, obj) => {
