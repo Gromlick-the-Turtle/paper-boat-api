@@ -10,13 +10,20 @@ export default class Model {
             throw Error (`Table not defined for ${this}`);
         }
 
-        const fields = _.chain(await db.getTableColumns(this.table))
+        this.fields = _.chain({
+                ...await db.getTableColumns(this.table),
+                ...this.fields
+            })
             .mapKeys(({ name, type }) => _.camelCase(name))
             .omit([ 'createdAt', 'updatedAt', 'deletedAt' ])
-            .mapValues(({ name, type }) => global[type])
+            .mapValues(({ name, type }) => {
+                if (_.isString(type)) {
+                    return global[type];
+                } else {
+                    return type;
+                }
+            })
             .value();
-
-        this.fields = { ...fields, ...this.fields };
 
         return true;
     }
@@ -31,8 +38,6 @@ export default class Model {
         if (Object.hasOwn(this, 'noGet')) {
             throw Error(`${this} has no get function`);
         }
-
-        params = new this(params);
 
         const items = await db.selectArr(this.table, params.forDB());
 
