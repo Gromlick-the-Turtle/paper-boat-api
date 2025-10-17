@@ -27,6 +27,20 @@ const paramsFromArr = (arr) => {
     return { cols, params, objs };
 }
 
+const buildWhere = (opts) => {
+    const where = _.chain(opts)
+        .map((val,key) => {
+            if (_.isNull(val)) {
+                return `${key} IS NULL`;
+            } else {
+                return `${key} = $(${key})`;
+            }
+        })
+        .value();
+
+    return where;
+}
+
 db.tableSchema = 'public';
 
 db.getTableColumns = (table) => {
@@ -52,14 +66,16 @@ db.getTableColumns = (table) => {
     `, {table});
 }
 
-db.selectArr = async (table, args = {}) => {
+db.selectArr = async (table, params = {}) => {
+    const where = buildWhere({ ...params, deleted_at: null });
+
     const query = `
         SELECT *
         FROM ${db.tableSchema}.${table}
-        WHERE deleted_at IS NULL
+        WHERE ${_.join(where, '\n\tAND ')}
     `;
 
-    return await db.any(query);
+    return await db.any(query, params);
 }
 
 db.insertObj = async (table, obj) => {

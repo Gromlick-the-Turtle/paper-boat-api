@@ -22,14 +22,17 @@ export default class Model {
         this.initialized = this._init();
     }
 
-    static async get (opts = {}) {
+    static async get (params = {}) {
         await this.initialized;
 
         if (Object.hasOwn(this, 'noGet')) {
             throw Error(`${this} has no get function`);
         }
 
-        const items = await db.selectArr(this.table);
+        params = new this(params);
+
+        const items = await db.selectArr(this.table, params.forDB());
+
         return _.map(items, item => new this(item));
     }
 

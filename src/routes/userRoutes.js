@@ -5,7 +5,7 @@ import User from '#models/User';
 const router = express.Router();
 
 router.get('', async (req, res) => {
-    res.json(await User.get());
+    res.json(await User.get(req.query));
 });
 
 router.post('', async (req, res) => {
