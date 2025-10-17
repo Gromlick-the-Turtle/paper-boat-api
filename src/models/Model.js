@@ -7,13 +7,13 @@ export default class Model {
             throw Error (`Table not defined for ${this}`);
         }
 
-        const fields = await db.getTableColumns(this.table);
-
-        this.fields = _.chain(fields)
+        const fields = _.chain(await db.getTableColumns(this.table))
             .mapKeys(({ name, type }) => _.camelCase(name))
             .omit([ 'createdAt', 'updatedAt', 'deletedAt' ])
-            .mapValues(({ name, type }) => type)
+            .mapValues(({ name, type }) => global[type])
             .value();
+
+        this.fields = { ...fields, ...this.fields };
 
         return true;
     }
@@ -91,7 +91,7 @@ export default class Model {
 
         const model = _.mapValues(this.constructor.fields, (type, name) => {
             if (!_.isUndefined(item[name])) {
-                return item[name];
+                return new type(item[name]);
             }
         })
 
