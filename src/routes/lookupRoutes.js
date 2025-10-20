@@ -4,12 +4,14 @@ import Lookup from '#models/Lookup';
 
 const router = express.Router();
 
-router.get('country', async (req,res) => res.json(await Lookup.getCountries()));
+router.get('', (req,res) => res.json('hi!'));
 
-router.get('state', async (req,res) => res.json(await Lookup.getStates()));
+router.get('/country', async (req,res) => res.json(await Lookup.getCountries()));
 
-router.get('user_role', async (req,res) => res.json(await Lookup.getUserRoles()));
+router.get('/state', async (req,res) => res.json(await Lookup.getStates()));
 
-router.get('custom_form_item_type', async (req,res) => res.json(await Lookup.getCustomFormItemTypes()));
+router.get('/user_role', async (req,res) => res.json(await Lookup.getUserRoles()));
+
+router.get('/custom_form_item_type', async (req,res) => res.json(await Lookup.getCustomFormItemTypes()));
 
 export default router;

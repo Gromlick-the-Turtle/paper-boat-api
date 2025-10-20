@@ -13,7 +13,7 @@ router.post('', async (req, res) => {
 });
 
 router.post('/:id', async (req, res) => {
-    res.json(await User.update({ ...req.body, id: req.params.id }));
+    res.json(await User.update(req.body, { id: req.params.id }));
 });
 
 router.delete('/:id', async (req, res) => {

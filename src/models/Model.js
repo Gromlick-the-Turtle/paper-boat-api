@@ -10,10 +10,32 @@ export default class Model {
             throw Error (`Table not defined for ${this}`);
         }
 
-        this.fields = _.chain({
-                ...await db.getTableColumns(this.table),
-                ...this.fields
-            })
+        const columns = await db
+            .withSchema('information_schema')
+            .select(
+                'column_name AS name',
+                db.raw(`
+                    CASE
+                        WHEN data_type IN ('integer','numeric')
+                        THEN 'Number'
+
+                        WHEN data_type = 'boolean'
+                        THEN 'Boolean'
+
+                        WHEN data_type IN ('JSONB', 'JSON')
+                        THEN 'Object'
+
+                        ELSE 'String'
+                    END AS type
+                `)
+            )
+            .from('columns')
+            .where({
+                table_schema: 'public',
+                table_name: this.table
+            });
+
+        this.fields = _.chain(columns)
             .mapKeys(({ name, type }) => _.camelCase(name))
             .omit([ 'createdAt', 'updatedAt', 'deletedAt' ])
             .mapValues(({ name, type }) => {
@@ -32,6 +54,17 @@ export default class Model {
         this.initialized = this._init();
     }
 
+    static keys () {
+        return _.chain(this.fields)
+            .keys()
+            .without(...this.hidden)
+            .value();
+    }
+
+    static keysDB () {
+        return _.map(this.keys(), _.snakeCase);
+    }
+
     static async get (params = {}) {
         await this.initialized;
 
@@ -39,12 +72,17 @@ export default class Model {
             throw Error(`${this} has no get function`);
         }
 
-        const items = await db.selectArr(this.table, params.forDB());
+        const query = db(this.table)
+            .select(this.keysDB())
+            .where(params)
+            .whereRaw('deleted_at IS NULL');
 
-        return _.map(items, item => {
-            item = _.omit(item, this.hidden);
-            return new this(item)
-        });
+        params = new this(params);
+        if (!_.isEmpty(params.forDB())) {
+            query.where(params.forDB());
+        }
+
+        return query;
     }
 
     static async create (item) {
@@ -54,23 +92,25 @@ export default class Model {
             throw Error(`${this} has no create function`);
         }
 
-        item = new this(item);
+        const params = (new this(item)).forDB();
 
-        const {id} = await db.insertObj(this.table, item.forDB());
-
-        return id;
+        return await db(this.table)
+            .insert(params)
+            .returning('id');
     }
 
-    static async update (item) {
+    static async update (item, { id }) {
         await this.initialized;
 
         if (Object.hasOwn(this, 'noUpdate')) {
             throw Error(`${this} has no update function`);
         }
 
-        item = new this(item);
+        const params = (new this(item)).forDB();
 
-        await db.updateObj(this.table, item.forDB());
+        await db(this.table)
+            .update(params)
+            .where({ id });
 
         return true;
     }
@@ -82,9 +122,11 @@ export default class Model {
             throw Error(`${this} has no delete function`);
         }
 
-        item = new this(item);
+        const params = (new this(item)).forDB();
 
-        await db.deleteObj(this.table, item.forDB());
+        await db(this.table)
+            .update({ deleted_at: 'NOW()' })
+            .where({ id: params.id });
 
         return true;
     }
@@ -111,9 +153,9 @@ export default class Model {
 
     forDB () {
         return _.chain(this.constructor.fields)
-            .mapValues((val, key) => this[key])
+            .pickBy((val,key) => !_.isUndefined(this[key]))
+            .mapValues((val, key) => this[key].valueOf())
             .mapKeys((val, key) => _.snakeCase(key))
-            .pickBy(val => !_.isUndefined(val))
             .value();
     }
 }

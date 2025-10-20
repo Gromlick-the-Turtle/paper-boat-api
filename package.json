@@ -8,7 +8,13 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pb": "node pb"
+  },
+  "imports": {
+    "#config/*": "./src/config/*.js",
+    "#models/*": "./src/models/*.js",
+    "#routes/*": "./src/routes/*.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -17,13 +23,12 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "knex": "^3.1.0",
     "lodash": "^4.17.21",
-    "pg-promise": "^12.2.0"
+    "pg": "^8.16.3"
   },
-  "imports": {
-    "#config/*": "./src/config/*.js",
-    "#models/*": "./src/models/*.js",
-    "#routes/*": "./src/routes/*.js"
+  "devDependencies": {
+    "commander": "^14.0.1"
   },
   "nodemonConfig": {
     "legacyWatch": true,
