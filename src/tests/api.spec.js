@@ -37,3 +37,12 @@ test('Get users', async () => {
 
     await expect(vars.users).toBeTruthy()
 });
+
+test('Get user', async () => {
+    const re = await ctx.get('user/21');
+    vars.user = await re.json();
+
+    console.log(vars.user);
+
+    await expect(vars.user).toBeTruthy()
+});
