@@ -87,7 +87,7 @@ export default class Model {
                     }
                 });
             })
-            .whereNotNull('deleted_at');
+            .whereNull('deleted_at');
 
         return query;
     }
@@ -101,9 +101,11 @@ export default class Model {
 
         const params = (new this(item)).forDB();
 
-        return await db(this.table)
+        const re = await db(this.table)
             .insert(params)
             .returning('id');
+
+        return re[0].id;
     }
 
     static async update (item, { id }) {
