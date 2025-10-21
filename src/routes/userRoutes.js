@@ -1,24 +1,13 @@
 import express from 'express';
 
-import User from '#models/User';
+import UserController from '#controllers/UserController';
 
 const router = express.Router();
 
-router.get('', async (req, res) => {
-    res.json(await User.get(req.query));
-});
-
-router.post('', async (req, res) => {
-    res.json(await User.create({ ...req.body, password: 'x' }));
-});
-
-router.post('/:id', async (req, res) => {
-    res.json(await User.update(req.body, { id: req.params.id }));
-});
-
-router.delete('/:id', async (req, res) => {
-    await User.delete({ id: req.params.id });
-    res.json();
-});
+router.get('',          UserController.get);
+router.get('/:id',      UserController.getOne);
+router.post('',         UserController.create);
+router.post('/:id',     UserController.update);
+router.delete('/:id',   UserController.delete);
 
 export default router;
