@@ -74,13 +74,20 @@ export default class Model {
 
         const query = db(this.table)
             .select(this.keysDB())
-            .where(params)
-            .whereRaw('deleted_at IS NULL');
+            .where(qry => {
+                _.each(params, (val,key) => {
+                    const [name, type] = _.split(key, ':');
 
-        params = new this(params);
-        if (!_.isEmpty(params.forDB())) {
-            query.where(params.forDB());
-        }
+                    if (_.isUndefined(name) || _.isUndefined(val)) {
+                        return;
+                    }
+
+                    if (_.isUndefined(type)) {
+                        qry.where(name, val);
+                    }
+                });
+            })
+            .whereNotNull('deleted_at');
 
         return query;
     }
