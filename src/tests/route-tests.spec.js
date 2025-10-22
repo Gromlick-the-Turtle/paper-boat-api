@@ -1,8 +1,18 @@
 import { test, expect } from '@playwright/test';
 import _ from 'lodash';
+import fs from 'node:fs';
 
-import User from '#route-tests/User';
+// import User from '#route-tests/User';
+let routeTests = [];
+_.each(fs.readdirSync('./src/tests'), file => {
+    if (file.includes('.route.js')) {
+        file = _.replace(file, '.route.js', '');
+    
+        const routeTest = import(`#route-tests/${file}`);
 
+        routeTests.push(routeTest);
+    }
+});
 let ctx;
 test.beforeAll(async ({ playwright }) => {
     ctx = await playwright.request.newContext({
@@ -14,7 +24,16 @@ test.afterAll(async () => {
     await ctx.dispose();
 });
 
-_.each([User], ({ model, route, id, create, update, generate }) => {
+_.each(routeTests, routeTest => routeTest.then(({ default: routeTest }) => {
+    let {
+        model,
+        route,
+        id,
+        create,
+        update,
+        generate
+    } = routeTest;
+
     const name = model.name;
     route = _.toLower(route ?? name);
 
@@ -82,4 +101,6 @@ _.each([User], ({ model, route, id, create, update, generate }) => {
             await expect(json).toBeTruthy();
         });
     }
-});
+}));
+
+await Promise.all(routeTests)
