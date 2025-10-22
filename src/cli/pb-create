@@ -1,0 +1,112 @@
+import { Command } from 'commander';
+import fs from 'node:fs';
+import _ from 'lodash';
+
+const cli = new Command();
+
+cli
+    .option('-m, --model', 'Create model')
+    .option('-c, --controller', 'Create controller')
+    .option('-r, --route', 'Create routes')
+    .option('-t, --test', 'Create route tests')
+    .option('-a, --all', 'Create all')
+    .argument('<model-name>');
+
+cli.parse(process.argv);
+
+const name = cli.args[0];
+
+const {
+    model,
+    controller,
+    route,
+    test,
+    all
+} = cli.opts();
+
+if (model || all) {
+    console.log(`Creating model for ${name}`);
+
+    const content =
+`import _ from 'lodash';
+
+import db from '#config/db';
+import Model from '#models/Model';
+
+export default class ${name} extends Model {
+    static table = 't_${_.toLower(name)}';
+
+    static { this.init(); }
+}`;
+
+    fs.writeFileSync(
+        `./src/models/${name}.js`,
+        content
+    );
+}
+
+if (controller || all) {
+    console.log(`Creating controller for ${name}`);
+
+    const content = 
+`import Controller from '#controllers/Controller';
+import ${name} from '#models/${name}';
+
+export default class ${name}Controller extends Controller {
+    static model = ${name};
+
+    static { this.init(); }
+}`;
+
+    fs.writeFileSync(
+        `./src/controllers/${name}Controller.js`,
+        content
+    );
+}
+
+if (route || all) {
+    console.log(`Creating routes for ${name}`);
+
+    const content =
+`import express from 'express';
+
+import ${name}Controller from '#controllers/${name}Controller';
+
+const router = express.Router();
+
+router.get('',          ${name}Controller.get);
+router.get('/:id',      ${name}Controller.getOne);
+router.post('',         ${name}Controller.create);
+router.post('/:id',     ${name}Controller.update);
+router.delete('/:id',   ${name}Controller.delete);
+
+export default router;`;
+    
+    fs.writeFileSync(
+        `./src/routes/${name}Routes.js`,
+        content
+    );
+}
+
+if (test || all) {
+    console.log(`Creating tests for ${name}`);
+
+    const content =
+`import { faker } from '@faker-js/faker';
+
+import ${name} from '#models/${name}';
+
+export default {
+    model: ${name},
+    route: '${_.toLower(name)}',
+    id: 1,
+    create: {},
+    update: {},
+    generate: () => ({})
+}`;
+
+    fs.writeFileSync(
+        `./src/tests/${name}.route.js`,
+        content
+    );
+}

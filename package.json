@@ -9,7 +9,7 @@
   "scripts": {
     "test": "npx playwright test --ui",
     "dev": "nodemon index.js",
-    "pb": "node pb"
+    "cli": "node ./src/cli/pb"
   },
   "imports": {
     "#config/*": "./src/config/*.js",

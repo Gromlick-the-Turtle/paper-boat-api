@@ -1,0 +1,10 @@
+import { Command } from 'commander';
+
+import Lookup from '#models/Lookup';
+import User from '#models/User';
+
+const cli = new Command();
+
+cli.command('create <model-name>', 'Create a model & possible related files');
+
+cli.parse(process.argv)
