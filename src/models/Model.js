@@ -55,14 +55,14 @@ export default class Model {
     }
 
     static keys () {
-        return _.chain(this.fields)
+        return _.chain({ ...this.fields, ...this.joins })
             .keys()
             .without(...this.hidden)
             .value();
     }
 
     static keysDB () {
-        return _.map(this.keys(), key => {
+        return _.map(_.keys(this.fields), key => {
             return `${this.table}.${_.snakeCase(key)}`;
         });
     }
@@ -75,12 +75,11 @@ export default class Model {
         }
 
         const query = db
-            .select(this.keysDB())
+            .select(...this.keysDB())
             .from(this.table);
 
-        _.each (this.stubs, (val,key) => {
-            query.select(`${val.table}.name AS ${key}_name`);
-            val.joinStub(query, `${this.table}.${key}_id`);
+        _.each (this.joins, ([model,join], name) => {
+            model[join](query, this.table, name);
         })
 
         query.where(qry => {
@@ -92,7 +91,7 @@ export default class Model {
                     }
 
                     if (_.isUndefined(type)) {
-                        qry.where(name, val);
+                        qry.where(`${this.table}.${name}`, val);
                     }
                 });
             })
@@ -103,11 +102,19 @@ export default class Model {
         });
     }
 
-    static async joinStub (query, on) {
+    static async joinStub (query, table, column) {
+        query.select(
+            db.raw(`TO_JSONB(${column}) AS ${column}`)
+        );
+
+        query.with(column, db.raw(`
+            SELECT id, name FROM ${this.table}
+        `));
+
         query.leftJoin(
-            this.table,
-            on,
-            `${this.table}.id`
+            column,
+            `${table}.${column}_id`,
+            `${column}.id`
         );
     }
 
@@ -170,24 +177,22 @@ export default class Model {
 
         item = _.mapKeys(item, (val,key) => _.camelCase(key));
 
-        const model = _.mapValues(this.constructor.fields, (type, name) => {
-            if (!_.isUndefined(item[name])) {
+        item = _.mapValues({
+            ...this.constructor.fields,
+            ...this.constructor.joins
+        }, (type, name) => {
+            if (_.isUndefined(item[name])) {
+                return;
+            } if (_.isArray(type)){
+                return item[name]
+            } else {
                 return new type(item[name]);
             }
         });
 
-        _.each (this.constructor.stubs, (type, name) => {
-            if (!_.isNil(item[`${name}Id`])) {
-                model[name] = {
-                    id: item[`${name}Id`],
-                    label: item[`${name}Name`]
-                }
+        item = _.pick(item, this.constructor.keys());
 
-                delete item[`${name}Id`];
-            }
-        });
-
-        Object.assign(this, model);
+        Object.assign(this, item);
     }
 
     forDB () {

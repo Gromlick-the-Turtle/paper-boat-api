@@ -8,11 +8,12 @@ export default class User extends Model {
     static table = 't_user';
 
     static hidden = [
-        'password'
+        'password',
+        'institutionId'
     ];
 
-    static stubs = {
-        institution: Institution
+    static joins = {
+        institution: [Institution,'joinStub']
     };
 
     static { this.init(); }
