@@ -14,7 +14,7 @@ test.afterAll(async () => {
     await ctx.dispose();
 });
 
-_.each([User], ({ model, route, id, create, update }) => {
+_.each([User], ({ model, route, id, create, update, generate }) => {
     const name = model.name;
     route = _.toLower(route ?? name);
 
@@ -26,6 +26,19 @@ _.each([User], ({ model, route, id, create, update }) => {
             );
 
             const json = await re.json()
+
+            console.log(json);
+
+            await expect(json).toBeTruthy();
+        });
+
+        test(`Generate ${name}`, async () => {
+            const re = await ctx.post(
+                route,
+                { data: generate() }
+            );
+
+            const json = await re.json();
 
             console.log(json);
 
