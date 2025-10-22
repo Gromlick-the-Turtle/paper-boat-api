@@ -68,19 +68,15 @@ if (route || all) {
     console.log(`Creating routes for ${name}`);
 
     const content =
-`import express from 'express';
+`import ${name}Controller from '#controllers/${name}Controller';
 
-import ${name}Controller from '#controllers/${name}Controller';
-
-const router = express.Router();
-
-router.get('',          ${name}Controller.get);
-router.get('/:id',      ${name}Controller.getOne);
-router.post('',         ${name}Controller.create);
-router.post('/:id',     ${name}Controller.update);
-router.delete('/:id',   ${name}Controller.delete);
-
-export default router;`;
+export default function ${name}Routes (router) {
+    router.get('/${_.toLower(name)}',          ${name}Controller.get);
+    router.get('/${_.toLower(name)}/:id',      ${name}Controller.getOne);
+    router.post('/${_.toLower(name)}',         ${name}Controller.create);
+    router.post('/${_.toLower(name)}/:id',     ${name}Controller.update);
+    router.delete('/${_.toLower(name)}/:id',   ${name}Controller.delete);
+}`;
     
     fs.writeFileSync(
         `./src/routes/${name}Routes.js`,
