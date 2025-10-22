@@ -62,7 +62,9 @@ export default class Model {
     }
 
     static keysDB () {
-        return _.map(this.keys(), _.snakeCase);
+        return _.map(this.keys(), key => {
+            return `${this.table}.${_.snakeCase(key)}`;
+        });
     }
 
     static async get (params = {}) {
@@ -72,9 +74,16 @@ export default class Model {
             throw Error(`${this} has no get function`);
         }
 
-        const query = db(this.table)
+        const query = db
             .select(this.keysDB())
-            .where(qry => {
+            .from(this.table);
+
+        _.each (this.stubs, (val,key) => {
+            query.select(`${val.table}.name AS ${key}_name`);
+            val.joinStub(query, `${this.table}.${key}_id`);
+        })
+
+        query.where(qry => {
                 _.each(params, (val,key) => {
                     const [name, type] = _.split(key, ':');
 
@@ -87,9 +96,19 @@ export default class Model {
                     }
                 });
             })
-            .whereNull('deleted_at');
+            .whereNull(`${this.table}.deleted_at`);
 
-        return query;
+        return _.map(await query, row => {
+            return new this(row);
+        });
+    }
+
+    static async joinStub (query, on) {
+        query.leftJoin(
+            this.table,
+            on,
+            `${this.table}.id`
+        );
     }
 
     static async create (item) {
@@ -155,7 +174,18 @@ export default class Model {
             if (!_.isUndefined(item[name])) {
                 return new type(item[name]);
             }
-        })
+        });
+
+        _.each (this.constructor.stubs, (type, name) => {
+            if (!_.isNil(item[`${name}Id`])) {
+                model[name] = {
+                    id: item[`${name}Id`],
+                    label: item[`${name}Name`]
+                }
+
+                delete item[`${name}Id`];
+            }
+        });
 
         Object.assign(this, model);
     }
