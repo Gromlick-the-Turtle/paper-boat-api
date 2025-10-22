@@ -38,7 +38,7 @@ _.each(routeTests, routeTest => routeTest.then(({ default: routeTest }) => {
     route = _.toLower(route ?? name);
 
     if (!Object.hasOwn(model, 'noCreate')) {
-        test(`Create ${name}`, async () => {
+        test(`${name}: create`, async () => {
             const re = await ctx.post(
                 route,
                 { data: create }
@@ -51,7 +51,7 @@ _.each(routeTests, routeTest => routeTest.then(({ default: routeTest }) => {
             await expect(json).toBeTruthy();
         });
 
-        test(`Generate ${name}`, async () => {
+        test(`${name}: generate`, async () => {
             const re = await ctx.post(
                 route,
                 { data: generate() }
@@ -66,7 +66,7 @@ _.each(routeTests, routeTest => routeTest.then(({ default: routeTest }) => {
     }
 
     if (!Object.hasOwn(model, 'noGet')) {
-        test(`Get ${name} index`, async () => {
+        test(`${name}: get index`, async () => {
             const re = await ctx.get(route);
 
             const json = await re.json()
@@ -76,7 +76,7 @@ _.each(routeTests, routeTest => routeTest.then(({ default: routeTest }) => {
             await expect(json).toBeTruthy();
         });
 
-        test(`Get one ${name}`, async () => {
+        test(`${name}: get one`, async () => {
             const re = await ctx.get(`${route}/${id}`);
 
             const json = await re.json();
@@ -88,7 +88,7 @@ _.each(routeTests, routeTest => routeTest.then(({ default: routeTest }) => {
     }
 
     if (!Object.hasOwn(model, 'noUpdate')) {
-        test(`Update ${name} index`, async () => {
+        test(`${name}: update`, async () => {
             const re = await ctx.post(
                 `${route}/${id}`,
                 { data: update },
