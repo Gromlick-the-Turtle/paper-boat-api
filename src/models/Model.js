@@ -125,7 +125,10 @@ export default class Model {
             throw Error(`${this} has no create function`);
         }
 
-        const params = (new this(item)).forDB();
+        const params = _.chain(item)
+            .pick(_.keys(this.fields))
+            .mapKeys((val,key) => _.snakeCase(key))
+            .value();
 
         const re = await db(this.table)
             .insert(params)
