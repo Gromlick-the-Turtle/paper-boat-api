@@ -68,8 +68,13 @@ export default class Model {
     }
 
     static hasOne(model, fColumn, lColumn) {
+        if (_.isNil(model) || !(new model() instanceof Model)) {
+            throw Error(`hasOne first arg must be instance of Model`);
+        }
+
         return (query, name) => {
             name = name ?? _.snakeCase(model.name);
+            
             fColumn = fColumn ?? 'id';
             lColumn = lColumn ?? `${name}_id`;
 
@@ -208,13 +213,13 @@ export default class Model {
         return true;
     }
 
-    constructor (item) {
+    constructor (item = {}) {
         if (_.isNil(this.constructor.initialized)) {
-            throw Error (`${this.constructor} has not been initialized, await static init() function`);
+            throw Error (`${this.constructor.name} has not been initialized, await static init() function`);
         }
 
         if (!_.isObject(item)) {
-            throw Error (`${this.constructor} constructor error: item is not object`);
+            throw Error (`${this.constructor.name} constructor error: item is not object`);
         }
 
         item = _.mapKeys(item, (val,key) => _.camelCase(key));
