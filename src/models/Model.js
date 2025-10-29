@@ -53,16 +53,10 @@ export default class Model {
     }
 
     static keys () {
-        return _.chain({ ...this.fields, ...this.joins })
+        return _.chain(this.fields)
             .keys()
             .without(...this.hidden)
             .value();
-    }
-
-    static keysDB () {
-        return _.map(_.keys(this.fields), key => {
-            return _.snakeCase(key);
-        });
     }
 
     static hasOne(model, fColumn, lColumn) {
@@ -71,13 +65,16 @@ export default class Model {
         }
 
         return (query, name) => {
-            name = name ?? _.snakeCase(model.name);
+            name = name ?? model.name;
             
             fColumn = fColumn ?? 'id';
             lColumn = lColumn ?? `${name}_id`;
 
             query
-                .select(`${name}.*`)
+                .select(..._.map(
+                    model.keys(),
+                    key => `${name}.${key} AS ${name}_${key}`)
+                )
                 .leftJoin(
                     model.get().as(name),
                     `${name}.${fColumn}`,
@@ -134,14 +131,10 @@ export default class Model {
         }
 
         return (query, name) => {
-            name = name ?? _.snakeCase(model.name);
+            name = name ?? model.name;
             
-            fColumn = fColumn ?? `${_.snakeCase(this.name)}_id`;
+            fColumn = fColumn ?? `${this.name}_id`;
             lColumn = lColumn ?? `id`;
-
-            const keys = _.chain(model.keysDB())
-                .map(key => `${model.table}.${key}`)
-                .value();
 
             const subquery = db
                 .select(fColumn, db.raw(
@@ -170,7 +163,7 @@ export default class Model {
         }
 
         const query = db
-            .select(..._.map(this.keysDB(), key => `${this.table}.${key}`))
+            .select(..._.map(this.keys(), key => `${this.table}.${key}`))
             .from(this.table);
 
         if (joins)
@@ -204,10 +197,7 @@ export default class Model {
             throw Error(`${this} has no create function`);
         }
 
-        const params = _.chain(item)
-            .pick(_.keys(this.fields))
-            .mapKeys((val,key) => _.snakeCase(key))
-            .value();
+        const params = _.pick(item, _.keys(this.fields));
 
         return db(this.table)
             .insert(params)
@@ -265,7 +255,6 @@ export default class Model {
         return _.chain(this.constructor.fields)
             .pickBy((val,key) => !_.isUndefined(this[key]))
             .mapValues((val, key) => this[key].valueOf())
-            .mapKeys((val, key) => _.snakeCase(key))
             .value();
     }
 }

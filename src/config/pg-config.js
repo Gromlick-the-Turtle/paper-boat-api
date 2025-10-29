@@ -11,6 +11,8 @@ const db = knex({
         database: 'postgres',
     },
 
+    wrapIdentifier: (val, origImp, ctx) => origImp(_.snakeCase(val)),
+
     postProcessResponse: (result, ctx) => {
         if (_.isArray(result)) {
             return _.map(
