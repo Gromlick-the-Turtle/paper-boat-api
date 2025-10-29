@@ -5,53 +5,51 @@ export default class Model {
     static hidden = [];
     static fields = {};
 
-    static async _init() {
-        if (_.isNil(this.table)) {
-            throw Error (`Table not defined for ${this}`);
-        }
+    static init() {
+        (async () => {
+            if (_.isNil(this.table)) {
+                throw Error (`Table not defined for ${this}`);
+            }
 
-        const columns = await db
-            .withSchema('information_schema')
-            .select(
-                'column_name AS name',
-                db.raw(`
-                    CASE
-                        WHEN data_type IN ('integer','numeric')
-                        THEN 'Number'
+            const columns = await db
+                .withSchema('information_schema')
+                .select(
+                    'column_name AS name',
+                    db.raw(`
+                        CASE
+                            WHEN data_type IN ('integer','numeric')
+                            THEN 'Number'
 
-                        WHEN data_type = 'boolean'
-                        THEN 'Boolean'
+                            WHEN data_type = 'boolean'
+                            THEN 'Boolean'
 
-                        WHEN data_type IN ('JSONB', 'JSON')
-                        THEN 'Object'
+                            WHEN data_type IN ('JSONB', 'JSON')
+                            THEN 'Object'
 
-                        ELSE 'String'
-                    END AS type
-                `)
-            )
-            .from('columns')
-            .where({
-                table_schema: 'public',
-                table_name: this.table
-            });
+                            ELSE 'String'
+                        END AS type
+                    `)
+                )
+                .from('columns')
+                .where({
+                    table_schema: 'public',
+                    table_name: this.table
+                });
 
-        this.fields = _.chain(columns)
-            .mapKeys(({ name, type }) => _.camelCase(name))
-            .omit([ 'createdAt', 'updatedAt', 'deletedAt' ])
-            .mapValues(({ name, type }) => {
-                if (_.isString(type)) {
-                    return global[type];
-                } else {
-                    return type;
-                }
-            })
-            .value();
+            this.fields = _.chain(columns)
+                .mapKeys(({ name, type }) => _.camelCase(name))
+                .omit([ 'createdAt', 'updatedAt', 'deletedAt' ])
+                .mapValues(({ name, type }) => {
+                    if (_.isString(type)) {
+                        return global[type];
+                    } else {
+                        return type;
+                    }
+                })
+                .value();
+        })()
 
         return true;
-    }
-
-    static init() {
-        this.initialized = this._init();
     }
 
     static keys () {
@@ -171,9 +169,7 @@ export default class Model {
         }
     }
 
-    static async get (params = {}) {
-        await this.initialized;
-
+    static get (params = {}) {
         if (Object.hasOwn(this, 'noGet')) {
             throw Error(`${this} has no get function`);
         }
@@ -204,13 +200,10 @@ export default class Model {
             query.whereNull(`${this.table}.deleted_at`);
         }
 
-console.log(query.toSQL())
         return query;
     }
 
-    static async create (item) {
-        await this.initialized;
-
+    static create (item) {
         if (Object.hasOwn(this, 'noCreate')) {
             throw Error(`${this} has no create function`);
         }
@@ -220,50 +213,36 @@ console.log(query.toSQL())
             .mapKeys((val,key) => _.snakeCase(key))
             .value();
 
-        const re = await db(this.table)
+        return db(this.table)
             .insert(params)
             .returning('id');
-
-        return re[0].id;
     }
 
-    static async update (item, { id }) {
-        await this.initialized;
-
+    static update (item, { id }) {
         if (Object.hasOwn(this, 'noUpdate')) {
             throw Error(`${this} has no update function`);
         }
 
         const params = (new this(item)).forDB();
 
-        await db(this.table)
+        return db(this.table)
             .update(params)
             .where({ id });
-
-        return true;
     }
 
-    static async delete (item) {
-        await this.initialized;
-
+    static delete (item) {
         if (Object.hasOwn(this, 'noDelete')) {
             throw Error(`${this} has no delete function`);
         }
 
         const params = (new this(item)).forDB();
 
-        await db(this.table)
+        return db(this.table)
             .update({ deleted_at: 'NOW()' })
             .where({ id: params.id });
-
-        return true;
     }
 
     constructor (item = {}) {
-        if (_.isNil(this.constructor.initialized)) {
-            throw Error (`${this.constructor.name} has not been initialized, await static init() function`);
-        }
-
         if (!_.isObject(item)) {
             throw Error (`${this.constructor.name} constructor error: item is not object`);
         }
