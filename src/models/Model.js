@@ -87,6 +87,43 @@ export default class Model {
         }
     }
 
+    static hasMany(model, fColumn, lColumn)  {
+        if (_.isNil(model) || !(new model() instanceof Model)) {
+            throw Error(`hasMany first arg must be instance of Model`);
+        }
+
+        return (query, name) => {
+            name = name ?? _.snakeCase(model.name);
+            
+            fColumn = fColumn ?? `${_.snakeCase(this.name)}_id`;
+            lColumn = lColumn ?? `id`;
+
+            const keys = _.chain(model.keysDB())
+                .map(key => `${model.table}.${key}`)
+                .value();
+
+            const subquery = db
+                .select(fColumn, db.raw(`
+                    JSONB_AGG(${model.table})
+                    AS ${name}
+                `))
+                .from(model.table)
+                .groupBy(fColumn)
+                .as(name)
+
+            query
+                .select(db.raw(`
+                    COALESCE(${name}.${name}, JSONB('[]'))
+                    AS ${name}
+                `))
+                .leftJoin(
+                    subquery,                        
+                    `${name}.${fColumn}`,
+                    `${this.table}.${lColumn}`
+                );
+        }
+    }
+
     static async get (params = {}) {
         await this.initialized;
 
