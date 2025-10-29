@@ -63,7 +63,7 @@ export default class Model {
 
     static keysDB () {
         return _.map(_.keys(this.fields), key => {
-            return `${this.table}.${_.snakeCase(key)}`;
+            return _.snakeCase(key);
         });
     }
 
@@ -75,7 +75,7 @@ export default class Model {
         }
 
         const query = db
-            .select(...this.keysDB())
+            .select(..._.map(this.keysDB(), key => `${this.table}.${key}`))
             .from(this.table);
 
         _.each (this.joins, ([model,join], name) => {
