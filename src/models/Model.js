@@ -76,15 +76,11 @@ export default class Model {
             fColumn = fColumn ?? 'id';
             lColumn = lColumn ?? `${name}_id`;
 
-            const keys = _.chain(model.keysDB())
-                .map(key => `${model.table}.${key} AS ${name}_${key}`)
-                .value();
-
             query
-                .select(keys)
+                .select(`${name}.*`)
                 .leftJoin(
-                    model.table,
-                    `${model.table}.${fColumn}`,
+                    model.get().as(name),
+                    `${name}.${fColumn}`,
                     `${this.table}.${lColumn}`
                 );
         }
@@ -148,19 +144,18 @@ export default class Model {
                 .value();
 
             const subquery = db
-                .select(fColumn, db.raw(`
-                    JSONB_AGG(${model.table})
-                    AS ${name}
-                `))
-                .from(model.table)
+                .select(fColumn, db.raw(
+                    `JSONB_AGG(${name}) AS ${name}`
+                ))
+                .from(model.get().as(name))
                 .groupBy(fColumn)
                 .as(name)
 
             query
-                .select(db.raw(`
-                    COALESCE(${name}.${name}, JSONB('[]'))
-                    AS ${name}
-                `))
+                .select(db.raw(
+                    `COALESCE(${name}.${name}, JSONB('[]')) `+
+                    `AS ${name}`
+                ))
                 .leftJoin(
                     subquery,                        
                     `${name}.${fColumn}`,
