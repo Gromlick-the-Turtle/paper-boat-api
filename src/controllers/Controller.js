@@ -4,7 +4,7 @@ export default class Controller {
             throw Error(`${model} has no get function`);
         }
 
-        res.json(await this.model.get(req.query));
+        res.json(await this.model.get(req.query, true));
     }
 
     static async getOne (model, req, res) {
@@ -12,7 +12,7 @@ export default class Controller {
             throw Error(`${this.model} has no get function`);
         }
 
-        res.json((await this.model.get({ id: req.params.id }))[0]);
+        res.json((await this.model.get({ id: req.params.id }, true))[0]);
     }
 
     static async create (model, req, res) {
@@ -20,7 +20,7 @@ export default class Controller {
             throw Error(`${this.model} has no create function`);
         }
 
-        res.json(await this.model.create(req.body));
+        res.json((await this.model.create(req.body))[0].id);
     }
 
     static async update (model, req, res) {
@@ -28,7 +28,9 @@ export default class Controller {
             throw Error(`${this.model} has no update function`);
         }
 
-        res.json(await this.model.update(req.body, { id: req.params.id }));
+        await this.model.update(req.body, { id: req.params.id })
+
+        res.json();
     }
 
     static async delete (model, req, res) {

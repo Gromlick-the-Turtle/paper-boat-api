@@ -169,7 +169,7 @@ export default class Model {
         }
     }
 
-    static get (params = {}) {
+    static get (params = {}, joins = false) {
         if (Object.hasOwn(this, 'noGet')) {
             throw Error(`${this} has no get function`);
         }
@@ -178,6 +178,7 @@ export default class Model {
             .select(..._.map(this.keysDB(), key => `${this.table}.${key}`))
             .from(this.table);
 
+        if (joins)
         _.each (this.joins, (func, name) => {
             func(query, name);
         });
