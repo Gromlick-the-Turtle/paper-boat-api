@@ -14,7 +14,7 @@ export default class User extends Model {
 
     static joins = {
         institution: this.hasOne(Institution),
-        roles: this.hasMany(UserOrganization)
+        roles: this.hasMany(UserOrganization),
     };
 
     static { this.init(); }

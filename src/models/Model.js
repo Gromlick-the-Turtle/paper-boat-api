@@ -180,13 +180,13 @@ export default class Model {
                     }
 
                     if (_.isUndefined(type)) {
-                        qry.where(`${this.table}.${name}`, val);
+                        qry.where(name, val);
                     }
                 });
             });
 
         if (Object.hasOwn(this.fields, 'deletedAt')) {
-            query.whereNull(`${this.table}.deleted_at`);
+            query.whereNull(`${this.table}.deletedAt`);
         }
 
         return query;
