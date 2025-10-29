@@ -67,6 +67,27 @@ export default class Model {
         });
     }
 
+    static hasOne(model, fColumn, lColumn) {
+
+        return (query, name) => {
+            name = name ?? _.snakeCase(model.name);
+            fColumn = fColumn ?? 'id';
+            lColumn = lColumn ?? `${name}_id`;
+
+            const keys = _.chain(model.keysDB())
+                .map(key => `${model.table}.${key} AS ${name}_${key}`)
+                .value();
+
+            query
+                .select(keys)
+                .leftJoin(
+                    model.table,
+                    `${model.table}.${fColumn}`,
+                    `${this.table}.${lColumn}`
+                );
+        }
+    }
+
     static async get (params = {}) {
         await this.initialized;
 
@@ -78,9 +99,9 @@ export default class Model {
             .select(..._.map(this.keysDB(), key => `${this.table}.${key}`))
             .from(this.table);
 
-        _.each (this.joins, ([model,join], name) => {
-            model[join](query, this.table, name);
-        })
+        _.each (this.joins, (func, name) => {
+            func(query, name);
+        });
 
         query.where(qry => {
                 _.each(params, (val,key) => {
@@ -97,25 +118,7 @@ export default class Model {
             })
             .whereNull(`${this.table}.deleted_at`);
 
-        return _.map(await query, row => {
-            return new this(row);
-        });
-    }
-
-    static async joinStub (query, table, column) {
-        query.select(
-            db.raw(`TO_JSONB(${column}) AS ${column}`)
-        );
-
-        query.with(column, db.raw(`
-            SELECT id, name FROM ${this.table}
-        `));
-
-        query.leftJoin(
-            column,
-            `${table}.${column}_id`,
-            `${column}.id`
-        );
+        return query;
     }
 
     static async create (item) {
@@ -186,10 +189,8 @@ export default class Model {
         }, (type, name) => {
             if (_.isUndefined(item[name])) {
                 return;
-            } if (_.isArray(type)){
-                return item[name]
             } else {
-                return new type(item[name]);
+                return item[name]
             }
         });
 
