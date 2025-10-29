@@ -1,0 +1,45 @@
+import { Command } from 'commander';
+import fs from 'node:fs';
+import _ from 'lodash';
+
+const cli = new Command();
+
+cli
+    .option('-m, --model', 'Delete model')
+    .option('-c, --controller', 'Delete controller')
+    .option('-r, --route', 'Delete routes')
+    .option('-t, --test', 'Delete route tests')
+    .option('-a, --all', 'Delete all')
+    .argument('<model-name>');
+
+cli.parse(process.argv);
+
+const name = cli.args[0];
+
+const {
+    model,
+    controller,
+    route,
+    test,
+    all
+} = cli.opts();
+
+if (model || all) {
+    console.log(`Deleting model for ${name}`);
+    fs.unlinkSync(`./src/models/${name}.js`);
+}
+
+if (controller || all) {
+    console.log(`Deleting controller for ${name}`);
+    fs.unlinkSync(`./src/controllers/${name}.js`);
+}
+
+if (route || all) {
+    console.log(`Deleting route for ${name}`);
+    fs.unlinkSync(`./src/routes/${name}.js`);
+}
+
+if (test || all) {
+    console.log(`Deleting test for ${name}`);
+    fs.unlinkSync(`./src/tests/${name}.js`);
+}

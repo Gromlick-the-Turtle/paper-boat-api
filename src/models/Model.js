@@ -68,7 +68,6 @@ export default class Model {
     }
 
     static hasOne(model, fColumn, lColumn) {
-
         return (query, name) => {
             name = name ?? _.snakeCase(model.name);
             fColumn = fColumn ?? 'id';

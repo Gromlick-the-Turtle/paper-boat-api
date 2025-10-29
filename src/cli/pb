@@ -5,6 +5,14 @@ import User from '#models/User';
 
 const cli = new Command();
 
-cli.command('create <model-name>', 'Create a model & possible related files');
+cli.command(
+    'create <model-name>',
+    'Create a model and/or related files'
+);
+
+cli.command(
+    'delete <model-name>',
+    'Delete a model and/or related files'
+)
 
 cli.parse(process.argv)
