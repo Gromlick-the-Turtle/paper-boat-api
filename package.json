@@ -16,6 +16,7 @@
     "#models/*": "./src/models/*.js",
     "#controllers/*": "./src/controllers/*.js",
     "#routes/*": "./src/routes/*.js",
+    "#middleware/*": "./src/middleware/*.js",
     "#tests/*": "./src/tests/*.spec.js",
     "#route-tests/*": "./src/tests/*.route.js"
   },
