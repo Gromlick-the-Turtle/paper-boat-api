@@ -2,9 +2,7 @@ import express from 'express';
 import _ from 'lodash';
 import fs from 'node:fs';
 
-import lookupRoutes from '#routes/lookupRoutes';
-import UserRoutes from '#routes/UserRoutes';
-import InstitutionRoutes from '#routes/InstitutionRoutes';
+import AuthController from '#controllers/AuthController';
 
 const routes = express.Router()
 
@@ -18,5 +16,7 @@ _.each(dir, async file => {
         route.default(routes);
     }
 });
+
+routes.post('/login', (...args) => AuthController.login(...args));
 
 export default routes;
