@@ -17,5 +17,11 @@ export default class User extends Model {
         roles: this.hasMany(UserOrganization),
     };
 
+    static getAuth (email) {
+        return db(this.table)
+            .select('id', 'password AS hash')
+            .where({ email });
+    }
+
     static { this.init(); }
 }
