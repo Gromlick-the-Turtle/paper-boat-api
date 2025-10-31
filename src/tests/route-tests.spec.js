@@ -2,7 +2,10 @@ import { test, expect } from '@playwright/test';
 import _ from 'lodash';
 import fs from 'node:fs';
 
-// import User from '#route-tests/User';
+import ddb from '#config/sqlite-config';
+
+const authToken = (await ddb('store').select('value').where({ key: 'authToken' }))[0].value;
+
 let routeTests = [];
 _.each(fs.readdirSync('./src/tests'), file => {
     if (file.includes('.route.js')) {
@@ -13,10 +16,14 @@ _.each(fs.readdirSync('./src/tests'), file => {
         routeTests.push(routeTest);
     }
 });
+
 let ctx;
 test.beforeAll(async ({ playwright }) => {
     ctx = await playwright.request.newContext({
         baseUrl: 'http://localhost:3000',
+        extraHTTPHeaders: {
+            'Authorization': `token ${authToken}`,
+        }
     });
 });
 
