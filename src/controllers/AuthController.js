@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import _ from 'lodash';
 
 import User from '#models/User';
 
@@ -39,5 +40,26 @@ export default class AuthController {
         } else {
             res.status(403).json({ error: 'incorrect email or password' });
         }
+    }
+
+    static async checkAuth (req, res, next) {
+        const token = _.chain(req.headers['authorization'])
+            ?.split(' ')
+            ?.nth(1)
+            ?.value();
+
+        if (!token) {
+            return res.status(403).json({ error: 'Auth Error: No token provided' });
+        }
+
+        let data;
+
+        try {
+            data = await jwt.verify(token, process.env.JWT_SECRET);
+        } catch (e) {
+            res.status(401).json({ error: 'Auth Error: token is expired or malformed' });
+        }
+
+        next();
     }
 }
