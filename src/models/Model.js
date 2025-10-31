@@ -1,6 +1,8 @@
 import db from '#config/db';
 import _ from 'lodash';
 
+import ServerError from '#errors/ServerError';
+
 export default class Model {
     static hidden = [];
     static fields = {};
@@ -61,7 +63,7 @@ export default class Model {
 
     static hasOne(model, fColumn, lColumn) {
         if (_.isNil(model) || !(new model() instanceof Model)) {
-            throw Error(`hasOne first arg must be instance of Model`);
+            throw new ServerError(`hasOne first arg must be instance of Model`);
         }
 
         return (query, name) => {
@@ -127,7 +129,7 @@ export default class Model {
 
     static hasMany(model, fColumn, lColumn)  {
         if (_.isNil(model) || !(new model() instanceof Model)) {
-            throw Error(`hasMany first arg must be instance of Model`);
+            throw new ServerError(`hasMany first arg must be instance of Model`);
         }
 
         return (query, name) => {
@@ -159,7 +161,7 @@ export default class Model {
 
     static get (params = {}, joins = false) {
         if (Object.hasOwn(this, 'noGet')) {
-            throw Error(`${this} has no get function`);
+            throw new ServerError(`${this} has no get function`);
         }
 
         const query = db
@@ -194,7 +196,7 @@ export default class Model {
 
     static create (item) {
         if (Object.hasOwn(this, 'noCreate')) {
-            throw Error(`${this} has no create function`);
+            throw new ServerError(`${this} has no create function`);
         }
 
         const params = _.pick(item, _.keys(this.fields));
@@ -206,7 +208,7 @@ export default class Model {
 
     static update (item, { id }) {
         if (Object.hasOwn(this, 'noUpdate')) {
-            throw Error(`${this} has no update function`);
+            throw new ServerError(`${this} has no update function`);
         }
 
         const params = (new this(item)).forDB();
@@ -218,7 +220,7 @@ export default class Model {
 
     static delete (item) {
         if (Object.hasOwn(this, 'noDelete')) {
-            throw Error(`${this} has no delete function`);
+            throw new ServerError(`${this} has no delete function`);
         }
 
         const params = (new this(item)).forDB();
@@ -230,7 +232,7 @@ export default class Model {
 
     constructor (item = {}) {
         if (!_.isObject(item)) {
-            throw Error (`${this.constructor.name} constructor error: item is not object`);
+            throw new ServerError (`${this.constructor.name} constructor error: item is not object`);
         }
 
         item = _.mapKeys(item, (val,key) => _.camelCase(key));
