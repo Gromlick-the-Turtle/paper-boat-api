@@ -1,0 +1,19 @@
+import { Command } from 'commander';
+import db from './sqlite-config.js';
+
+const cli = new Command();
+
+cli.parse(process.argv);
+
+await db.schema.dropTableIfExists('store');
+
+await db.schema.createTable('store', table => {
+    table.string('key');
+    table.string('value');
+});
+
+await db('store').insert({ key: 'test', value: { id: 1, name: 'bob' } });
+
+await db.destroy();
+
+console.log('Test DB rebuilt');

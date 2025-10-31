@@ -13,6 +13,11 @@ cli.command(
 cli.command(
     'delete <model-name>',
     'Delete a model and/or related files'
-)
+);
+
+cli.command(
+    'db',
+    'Create sqlite DB with existing models',
+);
 
 cli.parse(process.argv)
