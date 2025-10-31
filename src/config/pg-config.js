@@ -1,14 +1,17 @@
 import knex from 'knex';
 import _ from 'lodash';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env' })
 
 const db = knex({
     client: 'pg',
     connection: {
-        host: 'localhost',
-        port: 8080,
-        user: 'postgres',
-        password: 'password',
-        database: 'postgres',
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_DATABASE,
     },
 
     wrapIdentifier: (val, origImp, ctx) => origImp(_.snakeCase(val)),
