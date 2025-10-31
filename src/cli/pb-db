@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import db from './sqlite-config.js';
+import db from '#config/sqlite-config';
 
 const cli = new Command();
 
@@ -9,6 +9,7 @@ await db.schema.dropTableIfExists('store');
 
 await db.schema.createTable('store', table => {
     table.string('key');
+    table.unique('key');
     table.string('value');
 });
 

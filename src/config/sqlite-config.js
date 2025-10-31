@@ -2,7 +2,8 @@ import knex from 'knex';
 import fs from 'node:fs';
 import _ from 'lodash';
 
-const filename = './src/cli/db.sqlite';
+const filename = './dev-db.sqlite';
+
 if (!fs.existsSync(filename)) {
     fs.writeFileSync(filename, '');
 }
