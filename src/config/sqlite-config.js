@@ -11,6 +11,7 @@ if (!fs.existsSync(filename)) {
 const db = knex({
     client: 'better-sqlite3',
     connection: { filename },
+    useNullAsDefault: true,
 
     wrapIdentifier: (val, origImp, ctx) => origImp(_.snakeCase(val)),
 
