@@ -7,7 +7,9 @@ export default {
     route: 'user',
     id: 21,
     create: {},
-    update: {},
+    update: {
+        nameLast: 'Toot'
+    },
     generate: () => ({
         nameFirst: faker.person.firstName(),
         nameLast: faker.person.lastName(),

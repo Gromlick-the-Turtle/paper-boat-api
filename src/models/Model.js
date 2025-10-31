@@ -175,10 +175,14 @@ export default class Model {
 
         query.where(qry => {
                 _.each(params, (val,key) => {
-                    const [name, type] = _.split(key, ':');
+                    let [name, type] = _.split(key, ':');
 
                     if (_.isUndefined(name) || _.isUndefined(val)) {
                         return;
+                    }
+
+                    if (this.keys().includes(name)){
+                        name = `${this.table}.${name}`;
                     }
 
                     if (_.isUndefined(type)) {
