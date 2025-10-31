@@ -3,20 +3,21 @@ import _ from 'lodash';
 import fs from 'node:fs';
 
 import AuthController from '#controllers/AuthController';
-// import authMiddleware from '#middleware/AuthMiddleware';
 
-const routes = express.Router()
-
+const authedRoutes = express.Router();
 const dir = fs.readdirSync('./src/routes');
 
 _.each(dir, async file => {
-    file = _.replace(file, '.js', '');
+    if (file.includes('.js') && file != 'routes.js') {
+        file = _.replace(file, '.js', '');
 
-    if (file != 'routes') {
         let route = await import(`#routes/${file}`);
-        route.default(routes, [AuthController.checkAuth]);
+        route.default(authedRoutes);
     }
 });
+
+const routes = express.Router();
+routes.use('/v1', AuthController.checkAuth, authedRoutes);
 
 routes.post('/auth/register', (...args) => AuthController.register(...args));
 routes.post('/auth/login', (...args) => AuthController.login(...args));

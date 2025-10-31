@@ -42,7 +42,7 @@ _.each(routeTests, routeTest => routeTest.then(({ default: routeTest }) => {
     } = routeTest;
 
     const name = model.name;
-    route = _.toLower(route ?? name);
+    route = 'v1/' + _.toLower(route ?? name);
 
     if (!Object.hasOwn(model, 'noCreate')) {
         test(`${name}: create`, async () => {
