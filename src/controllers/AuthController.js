@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 
+import UnauthorizedError from '#errors/UnauthorizedError';
 import User from '#models/User';
 
 export default class AuthController {
@@ -29,7 +30,7 @@ export default class AuthController {
         const { id, hash } = (await User.getAuth(email))[0];
 
         if (!id) {
-            res.status(403).json({ error: 'incorrect email or password' });
+            throw new UnauthorizedError('incorrect email or password')
         }
 
         const re = await bcrypt.compare(password, hash);
@@ -38,7 +39,7 @@ export default class AuthController {
             const token = jwt.sign({ id, email }, process.env.JWT_SECRET, { expiresIn: '15m' });
             res.json({ token });
         } else {
-            res.status(403).json({ error: 'incorrect email or password' });
+            throw new UnauthorizedError('incorrect email or password')
         }
     }
 
@@ -49,7 +50,7 @@ export default class AuthController {
             ?.value();
 
         if (!token) {
-            return res.status(403).json({ error: 'Auth Error: No token provided' });
+            throw new UnauthorizedError('no token provided');
         }
 
         let data;
@@ -57,7 +58,7 @@ export default class AuthController {
         try {
             data = await jwt.verify(token, process.env.JWT_SECRET);
         } catch (e) {
-            res.status(401).json({ error: 'Auth Error: token is expired or malformed' });
+            throw new UnauthorizedError('token is expired or malformed')
         }
 
         next();

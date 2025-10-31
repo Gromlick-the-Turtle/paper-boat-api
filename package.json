@@ -17,6 +17,7 @@
     "#controllers/*": "./src/controllers/*.js",
     "#routes/*": "./src/routes/*.js",
     "#middleware/*": "./src/middleware/*.js",
+    "#errors/*": "./src/errors/*.js",
     "#tests/*": "./src/tests/*.spec.js",
     "#route-tests/*": "./src/tests/*.route.js"
   },
