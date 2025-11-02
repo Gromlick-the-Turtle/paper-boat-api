@@ -27,7 +27,7 @@ export default class AuthController {
     static async login (req, res) {
         const { email, password } = req.body;
 
-        const { id, hash } = (await User.getAuth(email))[0];
+        const { id, hash } = (await User.getAuth(email))[0] ?? {};
 
         if (!id) {
             throw new UnauthorizedError('incorrect email or password')
