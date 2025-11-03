@@ -24,7 +24,7 @@ app.use(routes);
 
 app.use((err, req, res, next) => {
     res.status(err.status ?? 500).json({ error: (err.prefix ?? '') + ': ' + err.message });
-    console.log('Error!!', err.message)
+    console.log('Error!!', err.message, err.stack)
 })
 
 app.listen(process.env.PORT, () => {
