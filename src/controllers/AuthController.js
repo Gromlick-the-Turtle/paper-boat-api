@@ -6,7 +6,7 @@ import UnauthorizedError from '#errors/UnauthorizedError';
 import User from '#models/User';
 
 export default class AuthController {
-    static async register (req, res) {
+    static async register (req, res, next) {
         const user = req.body;
 
         if (!user.email) {
@@ -21,10 +21,12 @@ export default class AuthController {
 
         const id = (await User.create(user))[0].id;
 
-        res.json(id);
+        req.authedUser = { id, email: user.email };
+
+        next();
     }
 
-    static async login (req, res) {
+    static async login (req, res, next) {
         const { email, password } = req.body;
 
         const { id, hash } = (await User.getAuth(email))[0] ?? {};
@@ -36,11 +38,12 @@ export default class AuthController {
         const re = await bcrypt.compare(password, hash);
 
         if (re) {
-            const token = jwt.sign({ id, email }, process.env.JWT_SECRET, { expiresIn: '15m' });
-            res.json({ token });
+            req.authedUser = { id, email };
         } else {
             throw new UnauthorizedError('incorrect email or password')
         }
+
+        next();
     }
 
     static async checkAuth (req, res, next) {
@@ -62,5 +65,19 @@ export default class AuthController {
         }
 
         next();
+    }
+
+    static async newToken (req, res, next) {
+        if (!req.authedUser) {
+            throw new UnauthorizedError('no user authed');
+        }
+
+        const token = jwt.sign(
+            req.authedUser,
+            process.env.JWT_SECRET,
+            { expiresIn: '15m' }
+        );
+
+        res.json({ token });
     }
 }

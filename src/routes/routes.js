@@ -19,7 +19,22 @@ _.each(dir, async file => {
 const routes = express.Router();
 routes.use('/v1', AuthController.checkAuth, authedRoutes);
 
-routes.post('/auth/register', (...args) => AuthController.register(...args));
-routes.post('/auth/login', (...args) => AuthController.login(...args));
+routes.post(
+    '/auth/register',
+    AuthController.register,
+    AuthController.newToken,
+);
+
+routes.post(
+    '/auth/login',
+    AuthController.login,
+    AuthController.newToken,
+);
+
+routes.post(
+    '/auth/refresh',
+    AuthController.checkAuth,
+    AuthController.newToken,
+);
 
 export default routes;
