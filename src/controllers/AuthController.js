@@ -56,10 +56,9 @@ export default class AuthController {
             throw new UnauthorizedError('no token provided');
         }
 
-        let data;
-
         try {
-            data = await jwt.verify(token, process.env.JWT_SECRET);
+            const { id, email } = await jwt.verify(token, process.env.JWT_SECRET);
+            req.authedUser = { id, email };
         } catch (e) {
             throw new UnauthorizedError('token is expired or malformed')
         }
