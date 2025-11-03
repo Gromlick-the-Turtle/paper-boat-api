@@ -14,7 +14,22 @@ export default class User extends Model {
 
     static joins = {
         institution: this.hasOne(Institution),
-        roles: this.hasMany(UserOrganization),
+        // roles: this.hasMany(UserOrganization),
+        // role: this.hasOne(UserOrganization, 'userId', 'id'),
+        role: query => {
+            query
+                .leftJoin(
+                    UserOrganization.table,
+                    `${UserOrganization.table}.userId`,
+                    `${this.table}.id`,
+                )
+                .select(
+                    `${UserOrganization.table}.id AS organizationId`,
+                    `${UserOrganization.table}.isAuthor`,
+                    `${UserOrganization.table}.isReviewer`,
+                    `${UserOrganization.table}.isAdmin`,
+                );
+        }
     };
 
     static getAuth (email) {
