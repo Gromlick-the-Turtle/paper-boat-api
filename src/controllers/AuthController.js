@@ -22,7 +22,7 @@ export default class AuthController {
 
         const id = (await User.create(user))[0].id;
 
-        req.authedUser = (await UserOrganization.get({ userId: id }))[0]
+        req.authedUser = (await UserOrganization.getAuthedUser(id))[0]
 
         next();
     }
@@ -39,7 +39,7 @@ export default class AuthController {
         const re = await bcrypt.compare(password, hash);
 
         if (re) {
-            req.authedUser = (await UserOrganization.get({ userId: id }))[0];
+            req.authedUser = (await UserOrganization.getAuthedUser(id))[0];
         } else {
             throw new UnauthorizedError('incorrect email or password')
         }
@@ -60,7 +60,7 @@ export default class AuthController {
         try {
             const { userId } = await jwt.verify(token, process.env.JWT_SECRET);
 
-            req.authedUser = (await UserOrganization.get({ userId }))[0];
+            req.authedUser = (await UserOrganization.getAuthedUser(userId))[0];
         } catch (e) {
             throw new UnauthorizedError('token is expired or malformed')
         }
