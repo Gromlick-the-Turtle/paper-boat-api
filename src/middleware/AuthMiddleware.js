@@ -6,7 +6,7 @@ import UnauthorizedError from '#errors/UnauthorizedError';
 import User from '#models/User';
 import UserOrganization from '#models/UserOrganization';
 
-export default class AuthController {
+export default class AuthMiddlewas {
     static async register (req, res, next) {
         const user = req.body;
 

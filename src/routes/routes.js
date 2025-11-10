@@ -2,7 +2,7 @@ import express from 'express';
 import _ from 'lodash';
 import fs from 'node:fs';
 
-import AuthController from '#controllers/AuthController';
+import AuthMiddleware from '#middleware/AuthMiddleware';
 
 const authedRoutes = express.Router();
 const dir = fs.readdirSync('./src/routes');
@@ -17,24 +17,24 @@ _.each(dir, async file => {
 });
 
 const routes = express.Router();
-routes.use('/v1', AuthController.checkAuth, authedRoutes);
+routes.use('/v1', AuthMiddleware.checkAuth, authedRoutes);
 
 routes.post(
     '/auth/register',
-    AuthController.register,
-    AuthController.newToken,
+    AuthMiddleware.register,
+    AuthMiddleware.newToken,
 );
 
 routes.post(
     '/auth/login',
-    AuthController.login,
-    AuthController.newToken,
+    AuthMiddleware.login,
+    AuthMiddleware.newToken,
 );
 
 routes.post(
     '/auth/refresh',
-    AuthController.checkAuth,
-    AuthController.newToken,
+    AuthMiddleware.checkAuth,
+    AuthMiddleware.newToken,
 );
 
 export default routes;
