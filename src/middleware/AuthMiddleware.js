@@ -22,9 +22,9 @@ export default class AuthMiddlewas {
 
         const id = (await User.create(user))[0].id;
 
-        req.authedUser = (await UserOrganization.getAuthedUser(id))[0]
+        req.authedUser = (await UserOrganization.getAuthedUser(id))[0] ?? { userId: id };
 
-        next();
+        res.status(201).json(true);
     }
 
     static async login (req, res, next) {
@@ -39,7 +39,7 @@ export default class AuthMiddlewas {
         const re = await bcrypt.compare(password, hash);
 
         if (re) {
-            req.authedUser = (await UserOrganization.getAuthedUser(id))[0];
+            req.authedUser = (await UserOrganization.getAuthedUser(id))[0] ?? { userId: id };
         } else {
             throw new UnauthorizedError('incorrect email or password')
         }

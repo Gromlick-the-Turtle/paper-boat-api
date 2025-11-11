@@ -17,12 +17,15 @@ _.each(dir, async file => {
 });
 
 const routes = express.Router();
-routes.use('/v1', AuthMiddleware.checkAuth, authedRoutes);
+routes.use(
+    '/v1',
+    AuthMiddleware.checkAuth,
+    authedRoutes
+);
 
 routes.post(
     '/auth/register',
     AuthMiddleware.register,
-    AuthMiddleware.newToken,
 );
 
 routes.post(
