@@ -1,0 +1,18 @@
+import { Command } from 'commander';
+import _ from 'lodash';
+
+import fake from '#cli/fake';
+
+const cli = new Command();
+
+cli
+    .argument('<model-name>')
+    .parse(process.argv);
+
+const name = cli.args[0];
+
+if (!!fake[name]) {
+    (async () => {
+        console.log(await fake[name]());
+    })()
+}

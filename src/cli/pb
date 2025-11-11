@@ -20,4 +20,8 @@ cli.command(
     'Create sqlite DB with existing models',
 );
 
+cli.command(
+    'fake <model-name>',
+    'Generate a fake object for <model-name>',
+);
 cli.parse(process.argv)
