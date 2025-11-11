@@ -13,7 +13,11 @@ export default class Model {
                 throw Error (`Table not defined for ${this}`);
             }
 
-            const columns = await db
+            if (!_.isEmpty(this.fields)) {
+                return;
+            }
+
+            const query = db
                 .withSchema('information_schema')
                 .select(
                     'column_name AS name',
@@ -37,6 +41,12 @@ export default class Model {
                     table_schema: 'public',
                     table_name: this.table
                 });
+
+            // console.log(query.toSQL());
+
+            const columns = await query;
+
+            // console.log(this.name, this.table, columns);
 
             this.fields = _.chain(columns)
                 .mapKeys(({ name, type }) => _.camelCase(name))
