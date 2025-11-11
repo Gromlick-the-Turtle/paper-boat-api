@@ -38,5 +38,26 @@ export default class User extends Model {
             .where({ email });
     }
 
+    static getProfile (id) {
+        const q = this
+            .get({ id })
+            .leftJoin(
+                db
+                    .select(
+                        'userId',
+                        db.raw(`JSONB_AGG(r) AS roles`)
+                    )
+                    .from(db.raw(`(SELECT 1) AS o`))
+                    .crossJoin(`${UserOrganization.table} AS r`)
+                    .groupBy('userId')
+                    .as('r'),
+                `r.userId`,
+                `${this.table}.id`,
+            )
+            .select('r.roles');
+
+        return q;
+    }
+
     static { this.init(); }
 }

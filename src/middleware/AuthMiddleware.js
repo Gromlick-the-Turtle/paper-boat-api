@@ -60,7 +60,7 @@ export default class AuthMiddlewas {
         try {
             const { userId } = await jwt.verify(token, process.env.JWT_SECRET);
 
-            req.authedUser = (await UserOrganization.getAuthedUser(userId))[0];
+            req.authedUser = (await UserOrganization.getAuthedUser(userId))[0] ?? { userId };
         } catch (e) {
             throw new UnauthorizedError('token is expired or malformed')
         }
