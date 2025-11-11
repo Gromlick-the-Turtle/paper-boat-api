@@ -7,7 +7,7 @@ export default class UserController extends Controller {
     static withOrganization;
 
     static async getProfile (req, res) {
-        res.json((await User.getProfile(req.authedUser.userId)));
+        res.json((await User.getProfile(req.authedUser.userId))[0]);
     }
 
     static { this.init(); }

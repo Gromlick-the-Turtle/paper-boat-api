@@ -39,8 +39,12 @@ export default class User extends Model {
     }
 
     static getProfile (id) {
-        const q = this
-            .get({ id })
+        return db
+            .select(
+                ..._.map(this.keys(), key => `${this.table}.${key}`),
+                'r.roles',
+            )
+            .from(User.table)
             .leftJoin(
                 db
                     .select(
@@ -48,15 +52,13 @@ export default class User extends Model {
                         db.raw(`JSONB_AGG(r) AS roles`)
                     )
                     .from(db.raw(`(SELECT 1) AS o`))
-                    .crossJoin(`${UserOrganization.table} AS r`)
+                    .crossJoin(UserOrganization.get().as('r'))
                     .groupBy('userId')
                     .as('r'),
                 `r.userId`,
                 `${this.table}.id`,
             )
-            .select('r.roles');
-
-        return q;
+            .where({ [`${User.table}.id`]: id });
     }
 
     static { this.init(); }
