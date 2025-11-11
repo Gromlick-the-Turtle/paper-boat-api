@@ -2,6 +2,8 @@ import { Command } from 'commander';
 import fs from 'node:fs';
 import _ from 'lodash';
 
+import db from '#config/pg-config';
+
 const cli = new Command();
 
 cli
@@ -27,22 +29,66 @@ const {
 if (model || all) {
     console.log(`Creating model for ${name}`);
 
-    const content =
+    const tableName = `t_${_.toLower(name)}`;
+
+    const query = db
+        .withSchema('information_schema')
+        .select(
+            'column_name AS name',
+            db.raw(`
+                CASE
+                    WHEN data_type IN ('integer','numeric')
+                    THEN 'Number'
+
+                    WHEN data_type = 'boolean'
+                    THEN 'Boolean'
+
+                    WHEN data_type IN ('JSONB', 'JSON')
+                    THEN 'Object'
+
+                    ELSE 'String'
+                END AS type
+            `)
+        )
+        .from('columns')
+        .where({
+            table_schema: 'public',
+            table_name: tableName
+        });
+
+    query.then(columns => {
+        columns = _.join(
+            _.chain(columns)
+                .reject({ name: 'created_at' })
+                .reject({ name: 'updated_at' })
+                .reject({ name: 'deleted_at' })
+                .map(({ name, type }) => `${_.camelCase(name)}: ${type}`)
+                .value(),
+            ',\n        '
+        );
+
+        const content =
 `import _ from 'lodash';
 
 import db from '#config/db';
 import Model from '#models/Model';
 
 export default class ${name} extends Model {
-    static table = 't_${_.toLower(name)}';
+    static table = '${tableName}';
+
+    static fields = {
+        ${columns}
+    }
 
     static { this.init(); }
 }`;
 
-    fs.writeFileSync(
-        `./src/models/${name}.js`,
-        content
-    );
+        fs.writeFileSync(
+            `./src/models/${name}.js`,
+            content
+        );
+    })
+
 }
 
 if (controller || all) {
