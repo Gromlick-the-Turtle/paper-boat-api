@@ -19,7 +19,8 @@
     "#middleware/*": "./src/middleware/*.js",
     "#errors/*": "./src/errors/*.js",
     "#tests/*": "./src/tests/*.spec.js",
-    "#route-tests/*": "./src/tests/*.route.js"
+    "#route-tests/*": "./src/tests/*.route.js",
+    "#cli/*": "./src/cli/*.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
