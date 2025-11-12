@@ -6,6 +6,24 @@ import Address from '#models/Address';
 import Institution from '#models/Institution';
 import User from '#models/User';
 
+const randomId = async model => {
+    const { min, max } = (
+        await db(model.table)
+        .min('id')
+        .max('id')
+        .select()
+    )[0];
+
+    const approxId = faker.number.int({ min, max });
+
+    return (
+        await db(model.table)
+        .select('id')
+        .where('id', '<=', approxId)
+        .limit(1)
+    )[0].id;
+};
+
 export default {
     address: async addr => {
         const address = {
@@ -16,34 +34,16 @@ export default {
             ...addr
         };
 
-        console.log(address);
-
         await Address.create(address);
 
         return address;
     },
 
     institution: async inst => {
-        const { min, max } = (
-            await db(Address.table)
-                .min('id')
-                .max('id')
-                .select()
-        )[0];
-
-        const approxAddrId = faker.number.int({ min, max });
-
-        const addressId = (
-            await db(Address.table)
-            .select('id')
-            .where('id', '<=', approxAddrId)
-            .limit(1)
-        )[0].id;
-
         const institution = {
             name: faker.company.name(),
             description: faker.lorem.paragraph(5),
-            addressId,
+            addressId: await randomId(Address),
             ...inst
         };
 
