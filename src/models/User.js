@@ -8,13 +8,24 @@ import UserOrganization from '#models/UserOrganization';
 export default class User extends Model {
     static table = 't_user';
 
+    static fields = {
+        id: Number,
+        nameFirst: String,
+        nameLast: String,
+        email: String,
+        emailVerified: Boolean,
+        password: String,
+        institutionId: Number,
+    };
+
     static hidden = [
-        'password'
+        'password',
+        // 'roles',
     ];
 
     static joins = {
         institution: this.hasOne(Institution),
-        // roles: this.hasMany(UserOrganization),
+        roles: this.hasMany(UserOrganization),
         // role: this.hasOne(UserOrganization, 'userId', 'id'),
         role: query => {
             query
