@@ -106,48 +106,6 @@ export default class Model {
         }
     }
 
-    // static hasOneThrough(
-    //     model, mModel,
-    //     fColumn, lColumn,
-    //     mfColumn, mlColumn
-    // ) {
-    //     if (_.isNil(model) || !(new model() instanceof Model)) {
-    //         throw Error(`hasOneThrough first arg must be instance of Model`);
-    //     }
-
-    //     if (_.isNil(mModel) || !(new mModel() instanceof Model)) {
-    //         throw Error(`hasOneThrough second arg must be instance of Model`);
-    //     }
-
-    //     return (query, name, mName) => {
-    //         name = name ?? _.snakeCase(model.name);
-    //         mName = mName ?? _.snakeCase(mModel.name);
-
-    //         fColumn = fColumn ?? 'id';
-    //         lColumn = lColumn ?? `${name}_id`;
-
-    //         mfColumn = mfColumn ?? 'id';
-    //         mlColumn = mlColumn ?? `${mName}_id`;
-
-    //         const keys = _.chain(model.keysDB())
-    //             .map(key => `${model.table}.${key} AS ${name}_${key}`)
-    //             .value();
-
-    //         query
-    //             .select(keys)
-    //             .leftJoin(
-    //                 mModel.table,
-    //                 `${mModel.table}.${mfColumn}`,
-    //                 `${this.table}.${mlColumn}`
-    //             )
-    //             .leftJoin(
-    //                 model.table,
-    //                 `${model.table}.${fColumn}`,
-    //                 `${mModel.table}.${lColumn}`
-    //             );
-    //     }
-    // }
-
     static hasMany(model, fColumn, lColumn)  {
         if (_.isNil(model) || !(new model() instanceof Model)) {
             throw new ServerError(`hasMany first arg must be instance of Model`);
