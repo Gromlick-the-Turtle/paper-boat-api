@@ -16,6 +16,7 @@ export default class User extends Model {
         emailVerified: Boolean,
         password: String,
         institutionId: Number,
+        bio: String,
     };
 
     static hidden = [
