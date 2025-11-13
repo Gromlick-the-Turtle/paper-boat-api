@@ -72,23 +72,34 @@ export default class Model {
     }
 
     static hasOne(model, fColumn, lColumn) {
-        if (_.isNil(model) || !(new model() instanceof Model)) {
-            throw new ServerError(`hasOne first arg must be instance of Model`);
-        }
-
         return (query, name) => {
             name = name ?? model.name;
             
             fColumn = fColumn ?? 'id';
             lColumn = lColumn ?? `${name}_id`;
 
+            let getter;
+
+            if (new model() instanceof Model) {
+                getter = model.get().as(name);
+            } else if (_.isFunction(model)) {
+                getter = model().as(name);
+            } else {
+                throw new ServerError(`hasOne first arg must be instance of Model or function`);
+            }
+
+            const subquery = db
+                .select(fColumn, db.raw(
+                    `TO_JSONB(${name}) AS ${name}`
+                ))
+                .from(db.raw('(SELECT 1) AS o'))
+                .crossJoin(getter)
+                .as(name)
+
             query
-                .select(..._.map(
-                    model.keys(),
-                    key => `${name}.${key} AS ${name}_${key}`)
-                )
+                .select(`${name}.${name}`)
                 .leftJoin(
-                    model.get().as(name),
+                    subquery,
                     `${name}.${fColumn}`,
                     `${this.table}.${lColumn}`
                 );
