@@ -25,7 +25,7 @@ export default class UserController extends Controller {
 
         const users = _.isArray(req.body) ? req.body : [req.body];
 
-        _.each(users, user => {
+        const proms = _.map(users, async user => {
             user.password = 'temp';
             user.organizationId = req.authedUser.organizationId;
 
@@ -70,7 +70,9 @@ export default class UserController extends Controller {
             });
         });
 
-        res.json(_.map(users, ({ userId }) => userId));
+        await Promise.all(proms);
+
+        res.json(_.map(users, ({ email }) => email));
     }
 
     static { this.init(); }
