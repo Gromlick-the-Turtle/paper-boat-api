@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import db from '#config/pg-config';
 import Controller from '#controllers/Controller';
 
@@ -21,55 +23,54 @@ export default class UserController extends Controller {
             throw new ForbiddenError('Only admins can invite users');
         }
 
-        const user = {
-            ...req.body,
-            password: 'temp',
-            organizationId: req.authedUser.organizationId,
-        };
+        const users = _.isArray(req.body) ? req.body : [req.body];
 
-console.log(user)
+        _.each(users, user => {
+            user.password = 'temp';
+            user.organizationId = req.authedUser.organizationId;
 
-        db.transaction(async trx => {
-            let qry = await User
-                .get({ email: user.email })
-                .transacting(trx);
-
-            if (!qry.length) {
-                qry = await User
-                    .create(user)
+            db.transaction(async trx => {
+                let qry = await User
+                    .get({ email: user.email })
                     .transacting(trx);
-            }
 
-            if (!qry.length) {
-                throw new ServerError('Could not create user');
-            }
+                if (!qry.length) {
+                    qry = await User
+                        .create(user)
+                        .transacting(trx);
+                }
 
-            user.userId = qry[0].id;
+                if (!qry.length) {
+                    throw new ServerError('Could not create user');
+                }
 
-            qry = await UserOrganization
-                .get({
-                    userId: user.userId,
-                    organizationId: user.organizationId
-                })
-                .transacting(trx);
+                user.userId = qry[0].id;
 
-            if (qry.length) {
-                let userOrg = qry[0];
-
-                await UserOrganization
-                    .update({
-                        ...userOrg,
-                        ...user,
-                    }, { id: userOrg.id })
+                qry = await UserOrganization
+                    .get({
+                        userId: user.userId,
+                        organizationId: user.organizationId
+                    })
                     .transacting(trx);
-            } else {
-                await UserOrganization
-                    .create(user)
-                    .transacting(trx);
-            }
+
+                if (qry.length) {
+                    let userOrg = qry[0];
+
+                    await UserOrganization
+                        .update({
+                            ...userOrg,
+                            ...user,
+                        }, { id: userOrg.id })
+                        .transacting(trx);
+                } else {
+                    await UserOrganization
+                        .create(user)
+                        .transacting(trx);
+                }
+            });
         });
 
-        res.json(user.userId);
+        res.json(_.map(users, ({ userId }) => userId));
     }
 
     static { this.init(); }

@@ -213,7 +213,10 @@ export default class Model {
             throw new ServerError(`${this} has no create function`);
         }
 
-        const params = _.pick(item, _.keys(this.fields));
+        const params = _.pick(
+            _.isArray(item) ? item[0] : item,
+            _.keys(this.fields)
+        );
 
         return db(this.table)
             .insert(params)
