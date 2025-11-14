@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import bcrypt from 'bcryptjs';
 
 import db from '#config/pg-config';
 import Controller from '#controllers/Controller';
@@ -76,15 +77,13 @@ export default class UserController extends Controller {
     }
 
     static async requestPwReset (req, res) {
-        const code = await User.requestPwReset(req.body);
+        const code = await User.requestPwReset(req.body.email);
 
-        if (code) {
-            res.status(201).json()
-        }
+        res.status(201).json();
     }
 
     static async getPwReset (req, res) {
-        const { nameFirst, nameLast } = User.getPwReset(req.params.code);
+        const { nameFirst, nameLast } = await User.getPwReset(req.params.code);
 
         res.json({ nameFirst, nameLast });
     }
