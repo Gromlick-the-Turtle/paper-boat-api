@@ -51,7 +51,20 @@ export default class User extends Model {
                     `${UserOrganization.table}.isReviewer`,
                     `${UserOrganization.table}.isAdmin`,
                 );
-        }
+        },
+
+        pwReset: query => {
+            query
+                .leftJoin(
+                    db('user_password_reset')
+                        .whereNull('doneAt')
+                        .whereNull('cancelledAt')
+                        .as('pwReset'),
+                    `${this.table}.id`,
+                    'pwReset.userId'
+                )
+                .select('code AS pwResetCode');
+        },
     };
 
     static getAuth (email) {
