@@ -42,17 +42,17 @@ routes.post(
 );
 
 routes.post(
-    'auth/pw-reset',
+    '/auth/pw-reset',
     UserController.requestPwReset,
 );
 
 routes.get(
-    'auth/pw-reset/:code',
+    '/auth/pw-reset/:code',
     UserController.getPwReset,
 );
 
 routes.post(
-    'auth/pw-reset/:code',
+    '/auth/pw-reset/:code',
     UserController.doPwReset,
 );
 
