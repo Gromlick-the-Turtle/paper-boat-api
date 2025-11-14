@@ -90,7 +90,9 @@ export default class UserController extends Controller {
     }
 
     static async doPwReset (req, res) {
-        const re = await User.doPwReset(req.params.code, req.body.password);
+        const password = await bcrypt.hash(req.body.password, 10);
+
+        const re = await User.doPwReset(req.params.code, password);
 
         if (re) {
             res.status(201).json();
