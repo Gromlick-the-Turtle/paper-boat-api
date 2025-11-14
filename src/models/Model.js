@@ -119,17 +119,19 @@ export default class Model {
 
             const subquery = db
                 .select(fColumn, db.raw(
-                    `JSONB_AGG(${name}) AS ${name}`
+                    `COALESCE (JSONB_AGG(${name}), JSONB('[]')) AS ${name}`
                 ))
-                .from(model.get().as(name))
+                .from(db.raw('(SELECT 1) AS o'))
+                .crossJoin(model.get().as(name))
                 .groupBy(fColumn)
                 .as(name)
 
             query
-                .select(db.raw(
-                    `COALESCE(${name}.${name}, JSONB('[]')) `+
-                    `AS ${name}`
-                ))
+                // .select(db.raw(
+                //     `COALESCE(${name}.${name}, JSONB('[]')) `+
+                //     `AS ${name}`
+                // ))
+                .select(`${name}.${name}`)
                 .leftJoin(
                     subquery,                        
                     `${name}.${fColumn}`,
@@ -147,10 +149,9 @@ export default class Model {
             .select(..._.map(this.keys(), key => `${this.table}.${key}`))
             .from(this.table);
 
-        if (joins)
-        _.each (this.joins, (func, name) => {
-            func(query, name);
-        });
+        if (joins) {
+            _.each (this.joins, (func, name) => func(query, name));
+        }
 
         query.where(qry => {
                 _.each(params, (val,key) => {
