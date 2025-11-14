@@ -61,7 +61,19 @@ export default class User extends Model {
     }
 
     static async requestPwReset (email) {
-        const { id } = (await db(this.table).select('id').where({ email }))[0].id;
+        const id = (
+            await db(this.table)
+            .select('id')
+            .where({ email })
+        )?.[0]?.id;
+
+        if (!id) { return; }
+
+        await db('user_password_reset')
+            .update({ cancelledAt: 'NOW()' })
+            .where({ userEmail: email })
+            .whereNull('doneAt')
+            .whereNull('cancelledAt');
 
         return (await db('user_password_reset')
             .insert({
@@ -73,17 +85,25 @@ export default class User extends Model {
     }
 
     static async getPwReset (code) {
-        return (await db('user_password_reset')
+        return (
+            await db('user_password_reset')
             .select('nameFirst', 'nameLast')
-            .join(this.table, `${this.table}.id`, '=', 'user_password_reset.userId'))[0];
+            .join(this.table, `${this.table}.id`, 'user_password_reset.userId')
+            .where({ code })
+            .whereNull('doneAt')
+            .whereNull('cancelledAt')
+        )[0];
     }
 
     static async doPwReset (code, password) {
-        const userId = await (db('user_password_reset')
+        const userId = (
+            await db('user_password_reset')
             .update({ doneAt: 'NOW()' })
             .where({ code })
             .whereNull('doneAt')
-            .returning('userId'))[0].userId;
+            .whereNull('cancelledAt')
+            .returning('userId')
+        )[0].userId;
 
         if (userId) {
             await db(this.table)
