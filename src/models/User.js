@@ -5,6 +5,16 @@ import Model from '#models/Model';
 import Institution from '#models/Institution';
 import UserOrganization from '#models/UserOrganization';
 
+function generateUID() {
+    // I generate the UID from two parts here 
+    // to ensure the random number provide enough bits.
+    var firstPart = (Math.random() * 46656) | 0;
+    var secondPart = (Math.random() * 46656) | 0;
+    firstPart = ("000" + firstPart.toString(36)).slice(-3);
+    secondPart = ("000" + secondPart.toString(36)).slice(-3);
+    return firstPart + secondPart;
+}
+
 export default class User extends Model {
     static table = 't_user';
 
@@ -48,6 +58,42 @@ export default class User extends Model {
         return db(this.table)
             .select('id', 'password AS hash')
             .where({ email });
+    }
+
+    static async requestPwReset (email) {
+        const { id } = (await db(this.table).select('id').where({ email }))[0].id;
+
+        return (await db('user_password_reset')
+            .insert({
+                userEmail: email,
+                userId: id,
+                code: generateUID(),
+            })
+            .returning('code'))[0];
+    }
+
+    static async getPwReset (code) {
+        return (await db('user_password_reset')
+            .select('nameFirst', 'nameLast')
+            .join(this.table, `${this.table}.id`, '=', 'user_password_reset.userId'))[0];
+    }
+
+    static async doPwReset (code, password) {
+        const userId = await (db('user_password_reset')
+            .update({ doneAt: 'NOW()' })
+            .where({ code })
+            .whereNull('doneAt')
+            .returning('userId'))[0].userId;
+
+        if (userId) {
+            await db(this.table)
+                .update({ password })
+                .where({ id: userId });
+
+            return true;
+        } else {
+            return false;
+        }
     }
 
     static getProfile (id) {

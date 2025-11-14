@@ -3,6 +3,7 @@ import _ from 'lodash';
 import fs from 'node:fs';
 
 import AuthMiddleware from '#middleware/AuthMiddleware';
+import UserController from '#controllers/UserController';
 
 const authedRoutes = express.Router();
 const dir = fs.readdirSync('./src/routes');
@@ -38,6 +39,21 @@ routes.post(
     '/auth/refresh',
     AuthMiddleware.checkAuth,
     AuthMiddleware.newToken,
+);
+
+routes.post(
+    'auth/pw-reset',
+    UserController.requestPwReset,
+);
+
+routes.get(
+    'auth/pw-reset/:code',
+    UserController.getPwReset,
+);
+
+routes.post(
+    'auth/pw-reset/:code',
+    UserController.doPwReset,
 );
 
 export default routes;

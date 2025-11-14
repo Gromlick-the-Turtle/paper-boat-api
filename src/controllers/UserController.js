@@ -75,5 +75,29 @@ export default class UserController extends Controller {
         res.json(_.map(users, ({ email }) => email));
     }
 
+    static async requestPwReset (req, res) {
+        const code = await User.requestPwReset(req.body);
+
+        if (code) {
+            res.status(201).json()
+        }
+    }
+
+    static async getPwReset (req, res) {
+        const { nameFirst, nameLast } = User.getPwReset(req.params.code);
+
+        res.json({ nameFirst, nameLast });
+    }
+
+    static async doPwReset (req, res) {
+        const re = await User.doPwReset(req.params.code, req.body.password);
+
+        if (re) {
+            res.status(201).json();
+        } else {
+            throw new ForbiddenError('Reset failed, try a new request');
+        }
+    }
+
     static { this.init(); }
 }
