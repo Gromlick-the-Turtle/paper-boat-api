@@ -33,7 +33,7 @@ export default class Institution extends Model {
             .where({ snakeName: _.snakeCase(name) })
         )?.[0]?.id;
 
-        let id = (await qry)?.[0]?.id;
+        id = (await qry)?.[0]?.id;
 
         if (!_.isNil(id)) {
             return id;
