@@ -70,27 +70,27 @@ export default class User extends Model {
     static getAuth (email) {
         return db(this.table)
             .select('id', 'password AS hash')
-            .where({ email });
+            .where({ email: _.toLower(email) });
     }
 
     static async requestPwReset (email) {
         const id = (
             await db(this.table)
             .select('id')
-            .where({ email })
+            .where({ email: _.toLower(email) })
         )?.[0]?.id;
 
         if (!id) { return; }
 
         await db('user_password_reset')
             .update({ cancelledAt: 'NOW()' })
-            .where({ userEmail: email })
+            .where({ userEmail: _.toLower(email) })
             .whereNull('doneAt')
             .whereNull('cancelledAt');
 
         return (await db('user_password_reset')
             .insert({
-                userEmail: email,
+                userEmail: _.toLower(email),
                 userId: id,
                 code: generateUID(),
             })

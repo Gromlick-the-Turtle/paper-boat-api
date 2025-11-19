@@ -29,6 +29,7 @@ export default class UserController extends Controller {
         const proms = _.map(users, async user => {
             user.password = 'temp';
             user.organizationId = req.authedUser.organizationId;
+            user.email = _.toLower(email);
 
             db.transaction(async trx => {
                 let qry = await User
@@ -39,10 +40,10 @@ export default class UserController extends Controller {
                     qry = await User
                         .create(user)
                         .transacting(trx);
-                }
 
-                if (!qry.length) {
-                    throw new ServerError('Could not create user');
+                    if (!qry.length) {
+                        throw new ServerError('Could not create user');
+                    }
                 }
 
                 user.userId = qry[0].id;

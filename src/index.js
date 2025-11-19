@@ -27,7 +27,7 @@ app.use((err, req, res, next) => {
         error: (err.prefix ?? '') + ': ' + err.message,
         message: err.message,
     });
-    console.log('Error!!', err.message, err.stack)
+    console.error('Error!!', err.message, err.stack)
 })
 
 app.listen(process.env.PORT, () => {
