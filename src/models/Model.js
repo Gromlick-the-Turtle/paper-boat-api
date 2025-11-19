@@ -207,7 +207,7 @@ export default class Model {
             throw new ServerError(`${this} has no update function`);
         }
 
-        const params = (new this(item)).forDB();
+        const params = this.forDB(item);
 
         return db(this.table)
             .update(params)
@@ -219,40 +219,21 @@ export default class Model {
             throw new ServerError(`${this} has no delete function`);
         }
 
-        const params = (new this(item)).forDB();
+        const params = this.forDB(item);
 
         return db(this.table)
             .update({ deleted_at: 'NOW()' })
             .where({ id: params.id });
     }
 
-    constructor (item = {}) {
-        if (!_.isObject(item)) {
-            throw new ServerError (`${this.constructor.name} constructor error: item is not object`);
-        }
-
-        item = _.mapKeys(item, (val,key) => _.camelCase(key));
-
-        item = _.mapValues({
-            ...this.constructor.fields,
-            ...this.constructor.joins
-        }, (type, name) => {
-            if (_.isUndefined(item[name])) {
-                return;
-            } else {
-                return item[name]
-            }
-        });
-
-        item = _.pick(item, this.constructor.keys());
-
-        Object.assign(this, item);
+    constructor () {
+        Object.assign(this, db(this.table));
     }
 
-    forDB () {
-        return _.chain(this.constructor.fields)
-            .pickBy((val,key) => !_.isUndefined(this[key]))
-            .mapValues((val, key) => this[key].valueOf())
+    static forDB (item) {
+        return _.chain(this.fields)
+            .pickBy((val,key) => !_.isUndefined(item[key]))
+            .mapValues((val, key) => item[key].valueOf())
             .value();
     }
 }
