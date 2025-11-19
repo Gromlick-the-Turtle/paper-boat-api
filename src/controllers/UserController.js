@@ -9,6 +9,7 @@ import ServerError from '#errors/ServerError';
 
 import User from '#models/User';
 import UserOrganization from '#models/UserOrganization';
+import Institution from '#models/Institution';
 
 export default class UserController extends Controller {
     static model = User;
@@ -29,7 +30,11 @@ export default class UserController extends Controller {
         const proms = _.map(users, async user => {
             user.password = 'temp';
             user.organizationId = req.authedUser.organizationId;
-            user.email = _.toLower(email);
+            user.email = _.toLower(user.email);
+
+            if (_.isEmpty(user.email)) {
+                return;
+            }
 
             db.transaction(async trx => {
                 let qry = await User
@@ -68,6 +73,10 @@ export default class UserController extends Controller {
                     await UserOrganization
                         .create(user)
                         .transacting(trx);
+                }
+
+                if (!_.isEmpty(user.institution) && _.isNil(user.institutionId)) {
+                    user.institutionId = Institution.upsertByNameMap(user.institution);
                 }
             });
         });
