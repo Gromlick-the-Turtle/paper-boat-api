@@ -76,7 +76,25 @@ export default class UserController extends Controller {
                 }
 
                 if (!_.isEmpty(user.institution) && _.isNil(user.institutionId)) {
-                    user.institutionId = Institution.upsertByNameMap(user.institution);
+                    let institutionId = (
+                        await Institution
+                        .getByName(user.institution)
+                        .transacting(trx)
+                    )?.[0]?.id;
+
+                    if (_.isNil(institutionId)) {
+                        institutionId = (
+                            await Institution
+                            .create({ name: user.institution })
+                            .transacting(trx)
+                        )?.[0]?.id;
+                    }
+
+                    if (!_.isNil(institutionId)) {
+                        await User
+                        .update({ institutionId }, { id: user.userId })
+                        .transacting(trx);
+                    }
                 }
             });
         });

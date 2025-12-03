@@ -15,31 +15,21 @@ export default class Institution extends Model {
         name: String,
         snakeName: String,
         description: String,
-        addressId: Number
+        addressId: Number,
+        deletedAt: String,
     }
 
     static create (item) {
         item.snakeName = _.snakeCase(item.name);
 
         return super.create(item)
-            .onConflict('snake_name')
+            .onConflict('snakeName')
             .ignore();
     }
 
-    static async upsertByNameMap (name) {
-        let id = (
-            db(this.table)
-            .select('id')
-            .where({ snakeName: _.snakeCase(name) })
-        )?.[0]?.id;
-
-        if (!_.isNil(id)) {
-            return id;
-        }
-
-        return (
-            await this.create({ name })
-        )?.[0]?.id;
+    static getByName (name) {
+        return super
+            .get({ snakeName: _.snakeCase(name) });
     }
 
     static { this.init(); }
