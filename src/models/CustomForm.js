@@ -8,10 +8,20 @@ export default class CustomForm extends Model {
 
     static fields = {
         id: Number,
+        createdAt: String,
+        updatedAt: String,
+        deletedAt: String,
         name: String,
         description: String,
-        organizationId: Number
-    }
+        organizationId: Number,
+        type: String
+    };
+
+    static hidden = [
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+    ];
 
     static { this.init(); }
 }

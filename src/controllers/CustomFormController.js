@@ -4,5 +4,7 @@ import CustomForm from '#models/CustomForm';
 export default class CustomFormController extends Controller {
     static model = CustomForm;
 
+    static withOrganization;
+
     static { this.init(); }
 }
