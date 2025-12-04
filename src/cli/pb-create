@@ -26,48 +26,57 @@ const {
     all
 } = cli.opts();
 
+
+const tableName = `t_${_.snakeCase(name)}`;
+
+const columns = await db
+    .withSchema('information_schema')
+    .select(
+        'column_name AS name',
+        db.raw(`
+            CASE
+                WHEN data_type IN ('integer','numeric')
+                THEN 'Number'
+
+                WHEN data_type = 'boolean'
+                THEN 'Boolean'
+
+                WHEN data_type IN ('JSONB', 'JSON')
+                THEN 'Object'
+
+                ELSE 'String'
+            END AS type
+        `)
+    )
+    .from('columns')
+    .where({
+        table_schema: 'public',
+        table_name: tableName
+    });
+
 if (model || all) {
     console.log(`Creating model for ${name}`);
 
-    const tableName = `t_${_.toLower(name)}`;
+    const hidden = _.chain(columns)
+        .map(({ name }) => _.camelCase(name))
+        .filter(name => [
+            'createdAt',
+            'updatedAt',
+            'deletedAt',
+        ].includes(name))
+        .map(col => `'${col}'`)
+        .join(',\n        ')
+        .value();
 
-    const query = db
-        .withSchema('information_schema')
-        .select(
-            'column_name AS name',
-            db.raw(`
-                CASE
-                    WHEN data_type IN ('integer','numeric')
-                    THEN 'Number'
+    const modelCols = _.join(
+        _.map(
+            columns,
+            ({ name, type }) => `${_.camelCase(name)}: ${type}`
+        ),
+        ',\n        '
+    );
 
-                    WHEN data_type = 'boolean'
-                    THEN 'Boolean'
-
-                    WHEN data_type IN ('JSONB', 'JSON')
-                    THEN 'Object'
-
-                    ELSE 'String'
-                END AS type
-            `)
-        )
-        .from('columns')
-        .where({
-            table_schema: 'public',
-            table_name: tableName
-        });
-
-    query.then(columns => {
-        columns = _.join(
-            _.chain(columns)
-                .reject({ name: 'created_at' })
-                .reject({ name: 'updated_at' })
-                .reject({ name: 'deleted_at' })
-                .map(({ name, type }) => `${_.camelCase(name)}: ${type}`)
-                .value(),
-            ',\n        '
-        );
-
-        const content =
+    const content =
 `import _ from 'lodash';
 
 import db from '#config/db';
@@ -77,22 +86,26 @@ export default class ${name} extends Model {
     static table = '${tableName}';
 
     static fields = {
-        ${columns}
-    }
+        ${modelCols}
+    };
+
+    static hidden = [
+        ${hidden}
+    ];
 
     static { this.init(); }
 }`;
 
-        fs.writeFileSync(
-            `./src/models/${name}.js`,
-            content
-        );
-    })
-
+    fs.writeFileSync(
+        `./src/models/${name}.js`,
+        content
+    );
 }
 
 if (controller || all) {
     console.log(`Creating controller for ${name}`);
+
+    const withOrganization = _.some(columns, { name: 'organization_id' });
 
     const content = 
 `import Controller from '#controllers/Controller';
@@ -100,6 +113,8 @@ import ${name} from '#models/${name}';
 
 export default class ${name}Controller extends Controller {
     static model = ${name};
+
+    ${ withOrganization ? 'static withOrganization;' : '' }
 
     static { this.init(); }
 }`;
@@ -117,11 +132,11 @@ if (route || all) {
 `import ${name}Controller from '#controllers/${name}Controller';
 
 export default function ${name}Routes (router) {
-    router.get('/${_.toLower(name)}',          ${name}Controller.get);
-    router.get('/${_.toLower(name)}/:id',      ${name}Controller.getOne);
-    router.post('/${_.toLower(name)}',         ${name}Controller.create);
-    router.post('/${_.toLower(name)}/:id',     ${name}Controller.update);
-    router.delete('/${_.toLower(name)}/:id',   ${name}Controller.delete);
+    router.get('/${_.snakeCase(name)}',          ${name}Controller.get);
+    router.get('/${_.snakeCase(name)}/:id',      ${name}Controller.getOne);
+    router.post('/${_.snakeCase(name)}',         ${name}Controller.create);
+    router.post('/${_.snakeCase(name)}/:id',     ${name}Controller.update);
+    router.delete('/${_.snakeCase(name)}/:id',   ${name}Controller.delete);
 }`;
     
     fs.writeFileSync(
@@ -152,3 +167,5 @@ export default {
         content
     );
 }
+
+process.exit();
