@@ -20,6 +20,9 @@ export default class User extends Model {
 
     static fields = {
         id: Number,
+        createdAt: String,
+        updatedAt: String,
+        deletedAt: String,
         nameFirst: String,
         nameLast: String,
         email: String,
@@ -30,6 +33,9 @@ export default class User extends Model {
     };
 
     static hidden = [
+        'createdAt',
+        'updatedAt',
+        'deletedAt',
         'password',
         // 'roles',
     ];
