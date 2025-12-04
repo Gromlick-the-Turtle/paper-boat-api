@@ -8,13 +8,22 @@ export default class SubmissionEvent extends Model {
 
     static fields = {
         id: Number,
+        createdAt: String,
+        updatedAt: String,
+        deletedAt: String,
         name: String,
         description: String,
         dueDate: String,
         organizationId: Number,
         submissionFormId: Number,
         reviewFormId: Number
-    }
+    };
+
+    static hidden = [
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+    ];
 
     static { this.init(); }
 }
