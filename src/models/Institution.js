@@ -7,16 +7,21 @@ export default class Institution extends Model {
     static table = 't_institution';
 
     static hidden = [
+        'createdAt',
+        'updatedAt',
+        'deletedAt',
         'snakeName',
     ];
 
     static fields = {
         id: Number,
+        createdAt: String,
+        updatedAt: String,
+        deletedAt: String,
         name: String,
         snakeName: String,
         description: String,
         addressId: Number,
-        deletedAt: String,
     }
 
     static create (item) {
