@@ -140,6 +140,19 @@ export default class Model {
         }
     }
 
+    static forDB (item) {
+        return _.chain(this.fields)
+            .pickBy((val,key) => !_.isUndefined(item[key]))
+            .mapValues((val, key) => {
+                if (val == Object) {
+                    return JSON.stringify(item[key]);
+                } else {
+                    return item[key]?.valueOf();
+                }
+            })
+            .value();
+    }
+
     static get (params = {}, joins = false) {
         if (Object.hasOwn(this, 'noGet')) {
             throw new ServerError(`${this} has no get function`);
@@ -227,13 +240,34 @@ export default class Model {
     }
 
     constructor () {
-        Object.assign(this, db(this.table));
+        if(this.table) {
+            Object.setPrototypeOf(this, db(this.table));
+        }
     }
 
-    static forDB (item) {
-        return _.chain(this.fields)
-            .pickBy((val,key) => !_.isUndefined(item[key]))
-            .mapValues((val, key) => item[key].valueOf())
-            .value();
+    withOne (name, model, fColumn, lColumn) {
+        name = name ?? model.name;
+
+        fColumn = fColumn ?? 'id';
+        lColumn = lColumn ?? `${name}_id`;
+
+        if (!Object.hasOwn(model, 'get')) {
+            throw new ServerError('Invalid model');
+        }
+
+        const subquery = db
+            .select(fColumn, db.raw(
+                `TO_JSONB(${name}) AS ${name}`
+            ))
+            .from(db.raw('(SELECT 1) AS o'))
+            .crossJoin(model.get().as(name))
+            .as(name);
+
+        return this.select(`${name}.${name}`)
+            .leftJoin(
+                subquery,
+                `${name}.${fColumn}`,
+                `${this.table}.${lColumn}`
+            );
     }
 }
