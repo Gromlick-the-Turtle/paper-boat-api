@@ -14,7 +14,8 @@ export default class CustomForm extends Model {
         name: String,
         description: String,
         organizationId: Number,
-        type: String
+        type: String,
+        items: Object
     };
 
     static hidden = [
