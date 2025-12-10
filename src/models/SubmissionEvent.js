@@ -14,9 +14,7 @@ export default class SubmissionEvent extends Model {
         name: String,
         description: String,
         dueDate: String,
-        organizationId: Number,
-        submissionFormId: Number,
-        reviewFormId: Number
+        organizationId: Number
     };
 
     static hidden = [

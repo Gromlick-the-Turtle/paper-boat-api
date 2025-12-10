@@ -11,11 +11,9 @@ export default class CustomForm extends Model {
         createdAt: String,
         updatedAt: String,
         deletedAt: String,
-        name: String,
-        description: String,
-        organizationId: Number,
         type: String,
-        items: Object
+        items: String,
+        submissionFormId: Number
     };
 
     static hidden = [
