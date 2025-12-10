@@ -13,7 +13,7 @@ export default class CustomForm extends Model {
         deletedAt: String,
         type: String,
         items: String,
-        submissionFormId: Number
+        submissionEventId: Number
     };
 
     static hidden = [
