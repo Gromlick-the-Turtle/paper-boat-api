@@ -108,15 +108,12 @@ if (controller || all) {
     const withOrganization = _.some(columns, { name: 'organization_id' });
 
     const content = 
-`import Controller from '#controllers/Controller';
+`import _ from 'lodash';
+import Controller from '#controllers/Controller';
 import ${name} from '#models/${name}';
 
 export default class ${name}Controller extends Controller {
-    static model = ${name};
-
-    ${ withOrganization ? 'static withOrganization;' : '' }
-
-    static { this.init(); }
+    model = ${name}; ${ withOrganization ? '\n\twithOrganization = false;' : '' }
 }`;
 
     fs.writeFileSync(
@@ -132,11 +129,11 @@ if (route || all) {
 `import ${name}Controller from '#controllers/${name}Controller';
 
 export default function ${name}Routes (router) {
-    router.get('/${_.snakeCase(name)}',          ${name}Controller.get);
-    router.get('/${_.snakeCase(name)}/:id',      ${name}Controller.getOne);
-    router.post('/${_.snakeCase(name)}',         ${name}Controller.create);
-    router.post('/${_.snakeCase(name)}/:id',     ${name}Controller.update);
-    router.delete('/${_.snakeCase(name)}/:id',   ${name}Controller.delete);
+    router.get('/${_.snakeCase(name)}',          ${name}Controller..bind('get'));
+    router.get('/${_.snakeCase(name)}/:id',      ${name}Controller..bind('getOne'));
+    router.post('/${_.snakeCase(name)}',         ${name}Controller..bind('create'));
+    router.post('/${_.snakeCase(name)}/:id',     ${name}Controller..bind('update'));
+    router.delete('/${_.snakeCase(name)}/:id',   ${name}Controller..bind('delete'));
 }`;
     
     fs.writeFileSync(

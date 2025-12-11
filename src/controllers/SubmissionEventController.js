@@ -7,7 +7,6 @@ import ForbiddenError from '#errors/ForbiddenError';
 
 export default class SubmissionEventController extends Controller {
     model = SubmissionEvent;
-    // withOrganization;
 
     async create (req, res) {
         const se = await SubmissionEvent.create(
