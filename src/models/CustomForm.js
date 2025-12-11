@@ -12,7 +12,7 @@ export default class CustomForm extends Model {
         updatedAt: String,
         deletedAt: String,
         type: String,
-        items: String,
+        items: Object,
         submissionEventId: Number
     };
 
