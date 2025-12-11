@@ -13,7 +13,6 @@ import Institution from '#models/Institution';
 
 export default class UserController extends Controller {
     model = User;
-    withOrganization;
 
     async getProfile (req, res) {
         res.json((await User.getProfile(req.authedUser.userId))[0]);

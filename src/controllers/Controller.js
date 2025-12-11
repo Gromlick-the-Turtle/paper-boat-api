@@ -1,54 +1,51 @@
+import _ from 'lodash';
+
 import ServerError from '#errors/ServerError';
 
 export default class Controller {
     model = {};
 
-    paramsWithPerms (params, authedUser) {
-        if (Object.hasOwn(this, 'withOrganization')) {
-            params.organizationId = authedUser[this.withOrganization ?? 'organizationId'];
+    // set this to false if it isn't there
+    withOrganization (req, res, next) {
+        if (req.query) {
+            req.query.organizationId = req.authedUser.organizationId;
         }
 
-        return params;
+        if (req.body) {
+            req.body.organizationId = req.authedUser.organizationId;
+        }
+
+        if (req.params) {
+            req.params.organizationId = req.authedUser.organizationId;
+        }
+
+        next()
     }
 
     async get (req, res) {
-        console.log(this)
-        res.json(await this.model.get(
-            this.paramsWithPerms(req.query, req.authedUser),
-            true
-        ));
+        res.json(await this.model.get(req.query, true));
     }
 
-    async getOne (req, res) {
-        res.json((await this.model.get(
-            this.paramsWithPerms({ id: req.params.id }, req.authedUser),
-            true
-        ))[0]);
+    async getOne ({ params: { id, organizationId } }, res) {
+        res.json((await this.model.get({ id, organizationId }, true))[0]);
     }
 
     async create (req, res) {
-        res.json((await this.model.create(
-            this.paramsWithPerms(req.body, req.authedUser)
-        ))[0].id);
+        res.json((await this.model.create(req.body))[0].id);
     }
 
-    async update (req, res) {
-        res.json(await this.model.update(
-            req.body,
-            this.paramsWithPerms({ id: req.params.id }, req.authedUser)
-        ));
+    async update ({ body, params: { id, organizationId } }, res) {
+        res.json(await this.model.update(req.body, { id, organizationId }));
     }
 
-    async delete (req, res) {
-        await this.model.delete(
-            this.paramsWithPerms({ id: req.params.id }, req.authedUser)
-        );
+    async delete ({ params: { id, organizationId } }, res) {
+        await this.model.delete({ id, organizationId });
 
         res.json();
     }
 
     static bind (func) {
         const me = new this();
-        return me[func].bind(me);
+        return _.filter([me.withOrganization, me[func].bind(me)]);
     }
 }
