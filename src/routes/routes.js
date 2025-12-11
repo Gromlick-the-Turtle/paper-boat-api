@@ -43,17 +43,17 @@ routes.post(
 
 routes.post(
     '/auth/pw-reset',
-    UserController.requestPwReset,
+    UserController.bind('requestPwReset'),
 );
 
 routes.get(
     '/auth/pw-reset/:code',
-    UserController.getPwReset,
+    UserController.bind('getPwReset'),
 );
 
 routes.post(
     '/auth/pw-reset/:code',
-    UserController.doPwReset,
+    UserController.bind('doPwReset'),
 );
 
 export default routes;

@@ -198,16 +198,13 @@ export default class Model {
 
         let params;
 
-        if (_.isArray(params)) {
+        if (_.isArray(item)) {
             params = _.map(item, i => _.pick(
                 _.isArray(item) ? item[0] : item,
                 _.keys(this.fields)
             ));
         } else {
-            params = _.pick(
-                _.isArray(item) ? item[0] : item,
-                _.keys(this.fields)
-            );
+            params = this.forDB(item);
         }
 
         return db(this.table)

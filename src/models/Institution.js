@@ -22,6 +22,7 @@ export default class Institution extends Model {
         snakeName: String,
         description: String,
         addressId: Number,
+        organizationId: Number,
     }
 
     static create (item) {

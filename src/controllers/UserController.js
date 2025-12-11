@@ -12,15 +12,14 @@ import UserOrganization from '#models/UserOrganization';
 import Institution from '#models/Institution';
 
 export default class UserController extends Controller {
-    static model = User;
+    model = User;
+    withOrganization;
 
-    static withOrganization;
-
-    static async getProfile (req, res) {
+    async getProfile (req, res) {
         res.json((await User.getProfile(req.authedUser.userId))[0]);
     }
 
-    static async inviteUser (req, res) {
+    async inviteUser (req, res) {
         if (!req.authedUser.isAdmin) {
             throw new ForbiddenError('Only admins can invite users');
         }
@@ -104,19 +103,19 @@ export default class UserController extends Controller {
         res.json(_.map(users, ({ email }) => email));
     }
 
-    static async requestPwReset (req, res) {
+    async requestPwReset (req, res) {
         const code = await User.requestPwReset(req.body.email);
 
         res.status(201).json();
     }
 
-    static async getPwReset (req, res) {
+    async getPwReset (req, res) {
         const { nameFirst, nameLast } = await User.getPwReset(req.params.code);
 
         res.json({ nameFirst, nameLast });
     }
 
-    static async doPwReset (req, res) {
+    async doPwReset (req, res) {
         const password = await bcrypt.hash(req.body.password, 10);
 
         const re = await User.doPwReset(req.params.code, password);
@@ -127,6 +126,4 @@ export default class UserController extends Controller {
             throw new ForbiddenError('Reset failed, try a new request');
         }
     }
-
-    static { this.init(); }
 }

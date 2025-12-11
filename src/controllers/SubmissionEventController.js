@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import Controller from '#controllers/Controller';
 import SubmissionEvent from '#models/SubmissionEvent';
 import CustomForm from '#models/CustomForm';
@@ -5,11 +6,10 @@ import CustomForm from '#models/CustomForm';
 import ForbiddenError from '#errors/ForbiddenError';
 
 export default class SubmissionEventController extends Controller {
-    static model = SubmissionEvent;
+    model = SubmissionEvent;
+    withOrganization;
 
-    static withOrganization;
-
-    static async create (req, res) {
+    async create (req, res) {
         const se = await SubmissionEvent.create(
             this.paramsWithPerms(req.body, req.authedUser)
         );
@@ -32,7 +32,7 @@ export default class SubmissionEventController extends Controller {
         res.json(submissionEventId)
     }
 
-    static async getForm (submissionEventId, authedUser, type) {
+    async getForm (submissionEventId, authedUser, type) {
         const se = await SubmissionEvent.get(
             this.paramsWithPerms({ id: submissionEventId }, authedUser)
         );
@@ -49,19 +49,13 @@ export default class SubmissionEventController extends Controller {
         return cf?.[0];
     }
 
-    static async getSubmissionForm (req, res) {
+    async getSubmissionForm (req, res) {
         const form = await this.getForm(req.params.id, req.authedUser, 'submission');
         res.json(form);
     }
 
-    static async getReviewForm (req, res) {
+    async getReviewForm (req, res) {
         const form = await this.getForm(req.params.id, req.authedUser, 'review');
         res.json(form);
-    }
-
-    static {
-        this.init();
-        this.getSubmissionForm = this.getSubmissionForm.bind(this);
-        this.getReviewForm = this.getReviewForm.bind(this);
     }
 }
