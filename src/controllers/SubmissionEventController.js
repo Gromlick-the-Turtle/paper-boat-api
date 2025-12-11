@@ -9,9 +9,7 @@ export default class SubmissionEventController extends Controller {
     model = SubmissionEvent;
 
     async create (req, res) {
-        const se = await SubmissionEvent.create(
-            this.paramsWithPerms(req.body, req.authedUser)
-        );
+        const se = await SubmissionEvent.create(req.body);
 
         const submissionEventId = se?.[0]?.id;
 
@@ -31,30 +29,35 @@ export default class SubmissionEventController extends Controller {
         res.json(submissionEventId)
     }
 
-    async getForm (submissionEventId, authedUser, type) {
-        const se = await SubmissionEvent.get(
-            this.paramsWithPerms({ id: submissionEventId }, authedUser)
-        );
+    async authEvent ({ id, organizationId }) {
+        const event = await SubmissionEvent.get({ id, organizationId });
 
-        if (se?.[0]?.id != submissionEventId) {
+        if (event?.[0]?.id != id) {
             throw new ForbiddenError('You do not have permission to access that');
         }
-        
-        const cf = await CustomForm.get({
-            submissionEventId,
-            type,
-        });
-
-        return cf?.[0];
     }
 
-    async getSubmissionForm (req, res) {
-        const form = await this.getForm(req.params.id, req.authedUser, 'submission');
-        res.json(form);
+    async getSubmissionForm ({ params: { id, organizationId } }, res) {
+        await this.authEvent({ id, organizationId });
+
+        const form = await CustomForm.get({ submissionEventId: id, type: 'submission' });
+
+        res.json(form?.[0]);
     }
 
-    async getReviewForm (req, res) {
-        const form = await this.getForm(req.params.id, req.authedUser, 'review');
-        res.json(form);
+    async getReviewForm ({ params: { id, organizationId } }, res) {
+        await this.authEvent({ id, organizationId });
+
+        const form = await CustomForm.get({ submissionEventId: id, type: 'review' });
+
+        res.json(form?.[0]);
+    }
+
+    async updateForm ({ params, body: { id, items } }, res) {
+        await this.authEvent(params);
+
+        const form = await CustomForm.update({ items }, { id });
+
+        res.json(form?.[0])
     }
 }
