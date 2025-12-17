@@ -129,11 +129,11 @@ if (route || all) {
 `import ${name}Controller from '#controllers/${name}Controller';
 
 export default function ${name}Routes (router) {
-    router.get('/${_.snakeCase(name)}',          ${name}Controller..bind('get'));
-    router.get('/${_.snakeCase(name)}/:id',      ${name}Controller..bind('getOne'));
-    router.post('/${_.snakeCase(name)}',         ${name}Controller..bind('create'));
-    router.post('/${_.snakeCase(name)}/:id',     ${name}Controller..bind('update'));
-    router.delete('/${_.snakeCase(name)}/:id',   ${name}Controller..bind('delete'));
+    router.get('/${_.snakeCase(name)}',          ${name}Controller.bind('get'));
+    router.get('/${_.snakeCase(name)}/:id',      ${name}Controller.bind('getOne'));
+    router.post('/${_.snakeCase(name)}',         ${name}Controller.bind('create'));
+    router.post('/${_.snakeCase(name)}/:id',     ${name}Controller.bind('update'));
+    router.delete('/${_.snakeCase(name)}/:id',   ${name}Controller.bind('delete'));
 }`;
     
     fs.writeFileSync(
