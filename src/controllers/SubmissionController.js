@@ -11,12 +11,13 @@ export default class SubmissionController extends Controller {
     async update (req, res) {
         const re = await Submission.get({ id: req.params.id });
         const userId = re?.[0]?.authorUserId;
+        const id = re?.[0]?.id;
 
         if (userId != req.authedUser.userId) {
             throw new ForbiddenError('You cannot change abstracts without permission');
         }
 
-        await Submission.create(req.body);
+        await Submission.update(req.body, { id });
 
         res.json(req.params.id);
     }
