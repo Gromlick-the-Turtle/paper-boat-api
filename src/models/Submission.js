@@ -15,7 +15,8 @@ export default class Submission extends Model {
         deletedAt: String,
         title: String,
         authorUserId: Number,
-        submissionEventId: Number
+        submissionEventId: Number,
+        content: Object,
     };
 
     static hidden = [

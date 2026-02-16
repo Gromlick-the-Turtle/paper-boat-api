@@ -3,5 +3,6 @@ import Controller from '#controllers/Controller';
 import Submission from '#models/Submission';
 
 export default class SubmissionController extends Controller {
+    withOrganization = false;
     model = Submission; 
 }
