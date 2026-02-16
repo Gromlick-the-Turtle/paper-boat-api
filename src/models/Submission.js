@@ -2,6 +2,8 @@ import _ from 'lodash';
 
 import db from '#config/db';
 import Model from '#models/Model';
+import User from '#models/User';
+import SubmissionEvent from '#models/SubmissionEvent';
 
 export default class Submission extends Model {
     static table = 't_submission';
@@ -21,6 +23,11 @@ export default class Submission extends Model {
         'updatedAt',
         'deletedAt'
     ];
+
+    static joins = {
+        authorUser: this.hasOne(User),
+        submissionEvent: this.hasOne(SubmissionEvent),
+    };
 
     static { this.init(); }
 }
