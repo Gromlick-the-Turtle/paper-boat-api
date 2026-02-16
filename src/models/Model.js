@@ -163,7 +163,7 @@ export default class Model {
             .from(this.table);
 
         if (joins) {
-            _.each (this.joins, (func, name) => func(query, name));
+            _.each (this.joins, (func, name) => func(query, _.snakeCase(name)));
         }
 
         query.where(qry => {
