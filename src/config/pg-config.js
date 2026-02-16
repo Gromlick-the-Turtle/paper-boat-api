@@ -2,7 +2,24 @@ import knex from 'knex';
 import _ from 'lodash';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env' })
+dotenv.config({ path: '.env' });
+
+const camelKeys = function (json) {
+    if (_.isArray(json)) {
+        return _.map(json, row => camelKeys(row));
+    }
+
+    else if (_.isObject(json)) {
+        return _.chain(json)
+            .mapKeys((val,key) => _.camelCase(key))
+            .mapValues(val => camelKeys(val))
+            .value();
+    }
+
+    else {
+        return json;
+    }
+}
 
 const db = knex({
     client: 'pg',
@@ -17,17 +34,7 @@ const db = knex({
     wrapIdentifier: (val, origImp, ctx) => origImp(_.snakeCase(val)),
 
     postProcessResponse: (result, ctx) => {
-        if (_.isArray(result)) {
-            return _.map(
-                result,
-                row => _.mapKeys(
-                    row,
-                    (val,key) => _.camelCase(key)
-                )
-            );
-        } else {
-            return _.mapKeys((val,key) => _.camelCase(key));
-        }
+        return camelKeys(result);
     }
 });
 
