@@ -35,7 +35,7 @@ export default class Controller {
     }
 
     async update ({ body, params: { id, organizationId } }, res) {
-        res.json(await this.model.update(req.body, { id, organizationId }));
+        res.json(await this.model.update(body, { id, organizationId }));
     }
 
     async delete ({ params: { id, organizationId } }, res) {
