@@ -4,21 +4,27 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env' });
 
+// Maybe this function should live elsewhere
 const camelKeys = function (json) {
-    if (_.isArray(json)) {
+    // specific type checks go here
+    if (_.isDate (json)) {
+        return json
+    }
+
+    // check if array first, arrays *are* objects
+    if (_.isArray (json)) {
         return _.map(json, row => camelKeys(row));
     }
 
-    else if (_.isObject(json)) {
+    if (_.isObject (json)) {
         return _.chain(json)
             .mapKeys((val,key) => _.camelCase(key))
             .mapValues(val => camelKeys(val))
             .value();
     }
 
-    else {
-        return json;
-    }
+    // if we got this far, this should really be a basic type
+    return json;
 }
 
 const db = knex({
