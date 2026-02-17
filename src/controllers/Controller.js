@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import ServerError from '#errors/ServerError';
+import ForbiddenError from '#errors/ForbiddenError';
 
 export default class Controller {
     model = {};
@@ -25,24 +26,60 @@ export default class Controller {
         next()
     }
 
+    async canGet (params, user) { return true; }
+
     async get (req, res) {
+        if (!(await this.canGet(req.query, req.authedUser))) {
+            throw new ForbiddenError('You are not permitted to do that')
+        }
+
         res.json(await this.model.get(req.query, true));
     }
 
-    async getOne ({ params: { id, organizationId } }, res) {
-        res.json((await this.model.get({ id, organizationId }, true))[0]);
+    async getOne (req, res) {
+        if (!(await this.canGet(req.params, req.authedUser))) {
+            throw new ForbiddenError('You are not permitted to do that')
+        }
+
+        res.json((await this.model.get({ id: req.params.id }, true))[0]);
     }
 
+    async canCreate (params, user) { return true; }
+
     async create (req, res) {
+        if (!(await this.canCreate(req.body, req.authedUser))) {
+            throw new ForbiddenError('You are not permitted to do that');
+        }
+
         res.json((await this.model.create(req.body))[0].id);
     }
 
-    async update ({ body, params: { id, organizationId } }, res) {
-        res.json(await this.model.update(body, { id, organizationId }));
+    async canUpdate ({ id }, { organizationId }) {
+        const re = await this.model.get({ id, organizationId }, true);
+
+        return !!re.length;
     }
 
-    async delete ({ params: { id, organizationId } }, res) {
-        await this.model.delete({ id, organizationId });
+    async update (req, res) {
+        if (!(await this.canUpdate(req.params, req.authedUser))) {
+            throw new ForbiddenError('You are not permitted to do that');
+        }
+
+        res.json(await this.model.update(req.body, { id: req.params.id }));
+    }
+
+    async canDelete ({ id }, { organizationId }) {
+        const re = await this.model.get({ id, organizationId}, true);
+
+        return !!re.length;
+    }
+
+    async delete (req, res) {
+        if (!(await this.canDelete(req.params, req.authedUser))) {
+            throw new ForbiddenError('You are not permitted to do that');
+        }
+
+        await this.model.delete({ id: req.params.id });
 
         res.json();
     }
