@@ -52,7 +52,8 @@ export default class User extends Model {
                     `${this.table}.id`,
                 )
                 .select(
-                    `${UserOrganization.table}.id AS organizationId`,
+                    `${UserOrganization.table}.id AS userOrganizationId`,
+                    `${UserOrganization.table}.organizationId AS organizationId`,
                     `${UserOrganization.table}.isAuthor`,
                     `${UserOrganization.table}.isReviewer`,
                     `${UserOrganization.table}.isAdmin`,
