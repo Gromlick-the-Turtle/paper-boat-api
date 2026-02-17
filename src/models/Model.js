@@ -233,7 +233,7 @@ export default class Model {
 
         return db(this.table)
             .update({ deleted_at: 'NOW()' })
-            .where({ id: params.id });
+            .where(params);
     }
 
     constructor () {
