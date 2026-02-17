@@ -14,6 +14,20 @@ import Institution from '#models/Institution';
 export default class UserController extends Controller {
     model = User;
 
+    async update (req, res) {
+        console.log(req.body)
+        const re = await UserOrganization.update({
+            isAdmin: req.body.isAdmin,
+            isReviewer: req.body.isReviewer,
+            isAuthor: req.body.isAuthor,
+        }, {
+            id: req.body.userOrganizationId,
+            organizationId: req.body.organizationId
+        });
+
+        super.update(req, res)
+    }
+
     async getProfile (req, res) {
         res.json((await User.getProfile(req.authedUser.userId))[0]);
     }
