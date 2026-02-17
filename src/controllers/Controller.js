@@ -7,14 +7,17 @@ export default class Controller {
 
     // set this to false if it isn't there
     withOrganization (req, res, next) {
+        // for index calls
         if (req.query) {
             req.query.organizationId = req.authedUser.organizationId;
         }
 
+        // create/update calls
         if (req.body) {
             req.body.organizationId = req.authedUser.organizationId;
         }
 
+        // calls affecting *one* row (getOne, update, delete)
         if (req.params) {
             req.params.organizationId = req.authedUser.organizationId;
         }
