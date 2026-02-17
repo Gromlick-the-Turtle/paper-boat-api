@@ -28,6 +28,16 @@ export default class Submission extends Model {
     static joins = {
         authorUser: this.hasOne(User),
         submissionEvent: this.hasOne(SubmissionEvent),
+
+        organizationId: query => {
+            query
+                .leftJoin(
+                    SubmissionEvent.table,
+                    `${SubmissionEvent.table}.id`,
+                    `${Submission.table}.submissionEventId`
+                )
+                .select('organizationId');
+        },
     };
 
     static { this.init(); }
