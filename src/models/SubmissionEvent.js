@@ -22,6 +22,4 @@ export default class SubmissionEvent extends Model {
         'updatedAt',
         'deletedAt'
     ];
-
-    static { this.init(); }
 }

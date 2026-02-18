@@ -7,63 +7,6 @@ export default class Model {
     static hidden = [];
     static fields = {};
 
-    static init() {
-        (async () => {
-            if (_.isNil(this.table)) {
-                throw Error (`Table not defined for ${this}`);
-            }
-
-            if (!_.isEmpty(this.fields)) {
-                return;
-            }
-
-            const query = db
-                .withSchema('information_schema')
-                .select(
-                    'column_name AS name',
-                    db.raw(`
-                        CASE
-                            WHEN data_type IN ('integer','numeric')
-                            THEN 'Number'
-
-                            WHEN data_type = 'boolean'
-                            THEN 'Boolean'
-
-                            WHEN data_type IN ('JSONB', 'JSON')
-                            THEN 'Object'
-
-                            ELSE 'String'
-                        END AS type
-                    `)
-                )
-                .from('columns')
-                .where({
-                    table_schema: 'public',
-                    table_name: this.table
-                });
-
-            // console.log(query.toSQL());
-
-            const columns = await query;
-
-            // console.log(this.name, this.table, columns);
-
-            this.fields = _.chain(columns)
-                .mapKeys(({ name, type }) => _.camelCase(name))
-                .omit([ 'createdAt', 'updatedAt', 'deletedAt' ])
-                .mapValues(({ name, type }) => {
-                    if (_.isString(type)) {
-                        return global[type];
-                    } else {
-                        return type;
-                    }
-                })
-                .value();
-        })()
-
-        return true;
-    }
-
     static keys () {
         return _.chain(this.fields)
             .keys()

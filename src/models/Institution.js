@@ -37,6 +37,4 @@ export default class Institution extends Model {
         return super
             .get({ snakeName: _.snakeCase(name) });
     }
-
-    static { this.init(); }
 }

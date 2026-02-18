@@ -21,6 +21,4 @@ export default class CustomForm extends Model {
         'updatedAt',
         'deletedAt'
     ];
-
-    static { this.init(); }
 }

@@ -2,8 +2,9 @@ import _ from 'lodash';
 
 import db from '#config/db';
 import Model from '#models/Model';
+
 import User from '#models/User';
-import Submision from '#models/Submission';
+import Submission from '#models/Submission';
 import SubmissionEvent from '#models/SubmissionEvent';
 
 export default class Review extends Model {
@@ -27,12 +28,12 @@ export default class Review extends Model {
 
     static joins = {
         reviewerUser: this.hasOne(User),
-        submission: this.hasOne(Submision),
+        submission: this.hasOne(Submission),
 
         organizationId: query => {
             query
                 .leftJoin(
-                    Submision.table,
+                    Submission.table,
                     `${Submission.table}.id`,
                     `${Review.table}.submissionId`
                 )
@@ -44,6 +45,4 @@ export default class Review extends Model {
                 .select('organizationId');
         }
     }
-
-    static { this.init(); }
 }

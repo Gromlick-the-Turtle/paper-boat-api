@@ -14,6 +14,4 @@ export default class address extends Model {
         countryId: Number,
         zip: String
     }
-
-    static { this.init(); }
 }

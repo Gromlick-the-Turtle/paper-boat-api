@@ -2,7 +2,9 @@ import _ from 'lodash';
 
 import db from '#config/db';
 import Model from '#models/Model';
+
 import User from '#models/User';
+import Review from '#models/Review';
 import SubmissionEvent from '#models/SubmissionEvent';
 
 export default class Submission extends Model {
@@ -39,6 +41,4 @@ export default class Submission extends Model {
                 .select('organizationId');
         },
     };
-
-    static { this.init(); }
 }

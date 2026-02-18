@@ -160,6 +160,4 @@ export default class User extends Model {
             )
             .where({ [`${User.table}.id`]: id });
     }
-
-    static { this.init(); }
 }
