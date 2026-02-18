@@ -30,6 +30,8 @@ export default class User extends Model {
         password: String,
         institutionId: Number,
         bio: String,
+
+        name: String,
     };
 
     static hidden = [
