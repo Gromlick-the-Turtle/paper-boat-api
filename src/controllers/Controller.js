@@ -33,7 +33,7 @@ export default class Controller {
             throw new ForbiddenError('You are not permitted to do that')
         }
 
-        res.json(await this.model.get(req.query, true));
+        res.json(await this.model.selectWithJoins(req.query));
     }
 
     async getOne (req, res) {
@@ -41,7 +41,7 @@ export default class Controller {
             throw new ForbiddenError('You are not permitted to do that')
         }
 
-        res.json((await this.model.get({ id: req.params.id }, true))[0]);
+        res.json(await this.model.selectOneWithJoins(req.params.id));
     }
 
     async canCreate (params, user) { return true; }
@@ -51,7 +51,7 @@ export default class Controller {
             throw new ForbiddenError('You are not permitted to do that');
         }
 
-        res.json((await this.model.create(req.body))[0].id);
+        res.json((await this.model.insert(req.body)).id);
     }
 
     async canUpdate ({ id }, { organizationId }) {

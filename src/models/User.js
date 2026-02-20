@@ -18,7 +18,7 @@ function generateUID() {
 export default class User extends Model {
     static table = 't_user';
 
-    static fields = {
+    static model () { return {
         id: Number,
         createdAt: String,
         updatedAt: String,
@@ -32,49 +32,51 @@ export default class User extends Model {
         bio: String,
 
         name: String,
-    };
 
-    static hidden = [
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-        'password',
-        // 'roles',
-    ];
+        institution: Institution,
+    }};
 
-    static joins = {
-        institution: this.hasOne(Institution),
-        roles: this.hasMany(UserOrganization),
-        // role: this.hasOne(UserOrganization, 'userId', 'id'),
-        role: query => {
-            query
-                .leftJoin(
-                    UserOrganization.table,
-                    `${UserOrganization.table}.userId`,
-                    `${this.table}.id`,
-                )
-                .select(
-                    `${UserOrganization.table}.id AS userOrganizationId`,
-                    `${UserOrganization.table}.organizationId AS organizationId`,
-                    `${UserOrganization.table}.isAuthor`,
-                    `${UserOrganization.table}.isReviewer`,
-                    `${UserOrganization.table}.isAdmin`,
-                );
-        },
+    // static hidden = [
+    //     'createdAt',
+    //     'updatedAt',
+    //     'deletedAt',
+    //     'password',
+    //     // 'roles',
+    // ];
 
-        pwReset: query => {
-            query
-                .leftJoin(
-                    db('user_password_reset')
-                        .whereNull('doneAt')
-                        .whereNull('cancelledAt')
-                        .as('pwReset'),
-                    `${this.table}.id`,
-                    'pwReset.userId'
-                )
-                .select('code AS pwResetCode');
-        },
-    };
+    // static joins = {
+    //     institution: this.hasOne(Institution),
+    //     roles: this.hasMany(UserOrganization),
+    //     // role: this.hasOne(UserOrganization, 'userId', 'id'),
+    //     role: query => {
+    //         query
+    //             .leftJoin(
+    //                 UserOrganization.table,
+    //                 `${UserOrganization.table}.userId`,
+    //                 `${this.table}.id`,
+    //             )
+    //             .select(
+    //                 `${UserOrganization.table}.id AS userOrganizationId`,
+    //                 `${UserOrganization.table}.organizationId AS organizationId`,
+    //                 `${UserOrganization.table}.isAuthor`,
+    //                 `${UserOrganization.table}.isReviewer`,
+    //                 `${UserOrganization.table}.isAdmin`,
+    //             );
+    //     },
+
+    //     pwReset: query => {
+    //         query
+    //             .leftJoin(
+    //                 db('user_password_reset')
+    //                     .whereNull('doneAt')
+    //                     .whereNull('cancelledAt')
+    //                     .as('pwReset'),
+    //                 `${this.table}.id`,
+    //                 'pwReset.userId'
+    //             )
+    //             .select('code AS pwResetCode');
+    //     },
+    // };
 
     static getAuth (email) {
         return db(this.table)

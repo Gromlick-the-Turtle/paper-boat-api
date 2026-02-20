@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import Controller from '#controllers/Controller';
 import Review from '#models/Review';
-import Submission from '#models/Submission';
+import { Submission } from '#models/Submission';
 
 export default class ReviewController extends Controller {
     model = Review;

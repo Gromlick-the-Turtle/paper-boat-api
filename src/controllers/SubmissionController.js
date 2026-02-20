@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Controller from '#controllers/Controller';
-import Submission from '#models/Submission';
+import { Submission } from '#models/Submission';
 import SubmissionEvent from '#models/SubmissionEvent';
 
 import ForbiddenError from '#errors/ForbiddenError';

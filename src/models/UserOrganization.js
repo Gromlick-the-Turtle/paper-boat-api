@@ -6,7 +6,7 @@ import Model from '#models/Model';
 export default class UserOrganization extends Model {
     static table = 't_user_organization';
 
-    static fields = {
+    static model () { return {
         id: Number,
         createdAt: String,
         updatedAt: String,
@@ -16,13 +16,13 @@ export default class UserOrganization extends Model {
         isAdmin: Boolean,
         isReviewer: Boolean,
         isAuthor: Boolean,
-    }
+    }}
 
-   static hidden = [
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-    ];
+   // static hidden = [
+   //      'createdAt',
+   //      'updatedAt',
+   //      'deletedAt',
+   //  ];
 
     static async getAuthedUser (userId, organizationId) {
         const query = db(this.table).where({ userId });

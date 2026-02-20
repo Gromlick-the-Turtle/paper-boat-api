@@ -6,19 +6,10 @@ import Model from '#models/Model';
 export default class CustomForm extends Model {
     static table = 't_custom_form';
 
-    static fields = {
+    static get model () { return {
         id: Number,
-        createdAt: String,
-        updatedAt: String,
-        deletedAt: String,
         type: String,
         items: Object,
         submissionEventId: Number
-    };
-
-    static hidden = [
-        'createdAt',
-        'updatedAt',
-        'deletedAt'
-    ];
+    }};
 }
